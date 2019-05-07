@@ -1,0 +1,17 @@
+### Python ###
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+### PyCharm ###
+.idea/
+
+### Mac files ###
+.DS_Store
+
+### SonarQube ###
+.scannerwork
+
+## Packaging ##
+dist/
+build/
+*.egg-info/
