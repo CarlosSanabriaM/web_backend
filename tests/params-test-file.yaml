@@ -1,0 +1,25 @@
+topics:
+    text:
+        num_keywords:
+            default: 5
+            min: 0
+            max: 30
+    wordcloud:
+        num_keywords:
+            default: 10
+            min: 0
+            max: 100
+    documents:
+        num_documents:
+            default: 6
+            min: 0
+            max: 30
+        num_summary_sentences:
+            default: 2
+text:
+    num_related_documents:
+        default: 6
+        min: 0
+        max: 20
+    num_summary_sentences:
+        default: 4

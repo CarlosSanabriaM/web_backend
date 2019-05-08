@@ -1,0 +1,27 @@
+# Params specified in this file must be of type int
+
+topics:
+    text:
+        num_keywords:  # NUM_KEYWORDS_TOPIC_TEXTO
+            default: 5
+            min: 0
+            max: 30
+    wordcloud:  # NUM_KEYWORDS_TOPIC_NUBE
+        num_keywords:
+            default: 10
+            min: 0
+            max: 100  # MAX_NUM_KEYWORDS_TOPIC_NUBE
+    documents:
+        num_documents:  # NUM_DOCUMENTOS_TOPIC
+            default: 6
+            min: 0
+            max: 30  # MAX_NUM_DOCUMENTOS_TOPIC
+        num_summary_sentences:  # NUM_FRASES_RESUMEN_ADMIN
+            default: 2
+text:
+    num_related_documents:  # NUM_DOCUMENTOS_SIMILARES
+        default: 6
+        min: 0
+        max: 20  # MAX_NUM_DOCUMENTOS_SIMILARES
+    num_summary_sentences:  # NUM_FRASES_RESUMEN_USUARIO
+        default: 4
