@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Dict
 
 from topics_and_summary.models.summarization import TextRank
 from topics_and_summary.models.topics import TopicsModel, LdaMalletModel, Topic
@@ -106,7 +106,25 @@ class ModelsWrapper:
 
         return self.topics_model.get_topics(num_keywords)
 
-    def get_topics_word_cloud_images_urls(self, num_keywords: int = None):
+    def get_topics_word_cloud_images_urls(self, num_keywords: int = None) -> Dict[str, str]:
+        """
+        Returns a dict with the following structure:
+
+        * key (str): 'topic<topic-id>'
+        * value (str): 'path/to/topic<topic-id>-image.png', with paths relative to the static folder
+
+        If wordcloud images with the same num_keywords have been previously generated, they are not generated again.
+        If not, they are generated and stored inside a new folder <num_keywords>keywords. This new folder is created
+        inside the WORDCLOUD_IMAGES_DIR_PATH folder.
+
+        If num_keywords has no value, the default value is obtained from the params file.
+
+        If num_keywords value is lesser than the min value for this param or is greater than the max value
+        for this param (both specified in the params file) a UserError exception is raised.
+
+        :return: A dict with relative paths to the images as explained above.
+        """
+
         # Obtain the params values from the params file
         param_name = 'topics.wordcloud.num_keywords'
 
@@ -131,7 +149,7 @@ class ModelsWrapper:
             os.mkdir(wordcloud_images_num_keywords_dir)
             plot_word_clouds_of_topics(self.topics_model.get_topics(num_keywords), single_plot_per_topic=True,
                                        show_plot=False, save=True, dir_save_path=wordcloud_images_num_keywords_dir,
-                                       dpi=200)
+                                       save_base_name='topic', dpi=200)
 
         # Return a dictionary {'topicx': 'path/to/topicx-image.png'}, with paths relative to the static folder
         num_keywords_dir_relative_path = wordcloud_images_num_keywords_dir.split('static/')[1]
