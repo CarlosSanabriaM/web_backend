@@ -1,10 +1,13 @@
 import os
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
+from networkx import PowerIterationFailedConvergence
+from nltk import sent_tokenize
 from topics_and_summary.models.summarization import TextRank
 from topics_and_summary.models.topics import TopicsModel, LdaMalletModel, Topic
 from topics_and_summary.utils import pretty_print
 from topics_and_summary.visualizations import plot_word_clouds_of_topics
+from tqdm import tqdm
 
 from web_backend.params import get_param
 from web_backend.utils import get_abspath_from_project_source_root, UserError, join_paths
@@ -95,8 +98,10 @@ class ModelsWrapper:
         param_name = 'topics.text.num_keywords'
 
         if num_keywords is None:
+            # If num_keywords has no value, give it the default one
             num_keywords = get_param(param_name + '.default')
         else:
+            # If num_keywords has value, check if it's inside the valid range
             param_min_value = get_param(param_name + '.min')
             param_max_value = get_param(param_name + '.max')
 
@@ -129,8 +134,10 @@ class ModelsWrapper:
         param_name = 'topics.wordcloud.num_keywords'
 
         if num_keywords is None:
+            # If num_keywords has no value, give it the default one
             num_keywords = get_param(param_name + '.default')
         else:
+            # If num_keywords has value, check if it's inside the valid range
             param_min_value = get_param(param_name + '.min')
             param_max_value = get_param(param_name + '.max')
 
@@ -161,8 +168,95 @@ class ModelsWrapper:
 
         return paths_dict
 
-    def get_k_most_repr_docs_of_topic(self):
-        raise NotImplementedError
+    def _summarize_text(self, text: str, num_summary_sentences: int) -> Tuple[str, bool]:
+        """
+        Given a text and a number of sentences, this function tries to generate a summary of the text with \
+        that number of sentences using the SummarizationModel.
+
+        If the SummarizationModel doesn't converge, this function selects the first num_summary_sentences sentences \
+        as a summary.
+
+        :param text: Text to be summarized.
+        :param num_summary_sentences: Number of sentences of the summary.
+        :return: A tuple (summary, summary_generated_with_the_model). If summary_generated_with_the_model is True,
+        that means that the summary was generated with the Summarization model. Else, that means that the summary
+        contains the first num_summary_sentences sentences of the given text.
+        """
+
+        # Try to generate the summary using the summarization_model
+        try:
+            text_summary = self.summarization_model.get_k_best_sentences_of_text(text, num_summary_sentences)
+            summary_generated_with_the_model = True
+        except PowerIterationFailedConvergence:
+            # If the SummarizationModel doesn't converge, select the first num_summary_sentences sentences as a summary
+            text_sentences = sent_tokenize(text)
+            text_summary = text_sentences[:num_summary_sentences]
+            summary_generated_with_the_model = False
+
+        # Transform the summary from a List[str] to a str
+        text_summary = '\n'.join(text_summary)
+
+        return text_summary, summary_generated_with_the_model
+
+    def get_k_most_repr_docs_of_topic(self, topic: int, num_docs: int = None) -> List['ReprDocOfTopic']:
+        """
+        Given a topic-id and a number of documents, this function returns a List[ReprDocOfTopic] with info
+        about the num_docs most representative documents of the given topic. Of each document, ReprDocOfTopic stores:
+
+        * The document original content
+        * A summary of the document original content
+        * The document-topic probability
+
+        :param topic: Topic id in the range [0,num_topics-1]
+        :param num_docs:
+        :return:
+        """
+
+        # Check if the topic id has a valid value
+        if topic < 0 or topic > self.topics_model.num_topics - 1:
+            raise UserError('topic param must be in the range [{0},{1}]'
+                            .format(0, self.topics_model.num_topics - 1))
+
+        # Obtain the params values from the params file
+        param_name = 'topics.documents.num_documents'
+
+        if num_docs is None:
+            # If num_docs has no value, give it the default one
+            num_docs = get_param(param_name + '.default')
+        else:
+            # If num_docs has value, check if it's inside the valid range
+            param_min_value = get_param(param_name + '.min')
+            param_max_value = get_param(param_name + '.max')
+
+            if num_docs < param_min_value or num_docs > param_max_value:
+                raise UserError('num_docs param must be in the range [{0},{1}]'
+                                .format(param_min_value, param_max_value))
+
+        # Obtain the num_docs most representative document of the given topic as a pandas DataFrame
+        k_most_repr_docs_of_topic_df = self.topics_model.get_k_most_repr_docs_of_topic_as_df(topic, k=num_docs)
+
+        # Obtain the num_summary_sentences param specific for the most representative documents
+        num_summary_sentences = get_param('topics.documents.num_summary_sentences.default')
+
+        # Get the info from the DataFrame, generate the summaries and store each doc info inside a ReprDocOfTopic object
+        repr_doc_of_topic_list = []
+        progress_bar = tqdm(range(num_docs))
+        for i in progress_bar:
+            progress_bar.set_description('Selecting document content and generating summaries')
+            # Obtain the document content
+            doc_content = k_most_repr_docs_of_topic_df['Original doc text'][i]
+            # Generate the document content summary
+            doc_content_summary, _ = self._summarize_text(doc_content, num_summary_sentences)
+            # In this function, the second value returned by _summarize_text() is not used,
+            # because here the summary of a document is something secondary/accessory, and it doesn't really
+            # matter if the summary was generated with the SummarizationModel or not.
+
+            # Obtain the document-topic probability
+            doc_topic_prob = k_most_repr_docs_of_topic_df['Topic prob'][i]
+
+            repr_doc_of_topic_list.append(ReprDocOfTopic(doc_content, doc_content_summary, doc_topic_prob))
+
+        return repr_doc_of_topic_list
 
     def get_text_related_topics(self):
         raise NotImplementedError
@@ -172,3 +266,18 @@ class ModelsWrapper:
 
     def get_text_summary(self):
         raise NotImplementedError
+
+
+class ReprDocOfTopic:
+    """
+    DTO that stores the information about one of the most representative documents of a topic.
+
+    Instances of this class are created inside the get_k_most_repr_docs_of_topic() method.
+
+    The apis/user module will use this class to access the info returned by get_k_most_repr_docs_of_topic().
+    """
+
+    def __init__(self, doc_content: str, doc_content_summary: str, doc_topic_prob: float):
+        self.doc_content = doc_content
+        self.doc_content_summary = doc_content_summary
+        self.doc_topic_prob = doc_topic_prob
