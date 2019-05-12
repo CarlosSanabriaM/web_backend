@@ -14,11 +14,11 @@ class TestParams(unittest.TestCase):
         Loads param values from the yaml test file and checks if the values are the expected.
         """
         self.assertEqual(get_param('topics.text.num_keywords.default', self._PARAMS_TEST_FILE_PATH), 5)
-        self.assertEqual(get_param('topics.text.num_keywords.min', self._PARAMS_TEST_FILE_PATH), 0)
+        self.assertEqual(get_param('topics.text.num_keywords.min', self._PARAMS_TEST_FILE_PATH), 1)
         self.assertEqual(get_param('topics.text.num_keywords.max', self._PARAMS_TEST_FILE_PATH), 30)
 
         self.assertEqual(get_param('text.num_related_documents.default', self._PARAMS_TEST_FILE_PATH), 6)
-        self.assertEqual(get_param('text.num_related_documents.min', self._PARAMS_TEST_FILE_PATH), 0)
+        self.assertEqual(get_param('text.num_related_documents.min', self._PARAMS_TEST_FILE_PATH), 1)
         self.assertEqual(get_param('text.num_related_documents.max', self._PARAMS_TEST_FILE_PATH), 20)
 
     def test_update_param(self):
@@ -49,7 +49,7 @@ class TestParams(unittest.TestCase):
 
         # Check that other values haven't been modified
         self.assertEqual(get_param('topics.wordcloud.num_keywords.default', self._PARAMS_TEST_UPDATE_FILE_PATH), 10)
-        self.assertEqual(get_param('topics.wordcloud.num_keywords.min', self._PARAMS_TEST_UPDATE_FILE_PATH), 0)
+        self.assertEqual(get_param('topics.wordcloud.num_keywords.min', self._PARAMS_TEST_UPDATE_FILE_PATH), 1)
         self.assertEqual(get_param('topics.wordcloud.num_keywords.max', self._PARAMS_TEST_UPDATE_FILE_PATH), 100)
 
         # Remove the yaml copy file

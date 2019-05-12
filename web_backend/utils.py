@@ -21,3 +21,11 @@ def get_abspath_from_project_source_root(_path: str) -> str:
     and the rest of the Python packages and modules).
     """
     return path.abspath(join_paths(PROJECT_SOURCE_ROOT_PATH, _path))
+
+
+class UserError(Exception):
+    def __init__(self, message):
+        """
+        :param message: Message of the Error.
+        """
+        self.message = message

@@ -11,7 +11,10 @@ __pycache__/
 ### SonarQube ###
 .scannerwork
 
-## Packaging ##
+### Packaging ###
 dist/
 build/
 *.egg-info/
+
+### Wordcloud images ###
+web_backend/static/wordcloud-images
