@@ -198,10 +198,10 @@ class ModelsWrapper:
 
         return text_summary, summary_generated_with_the_model
 
-    def get_k_most_repr_docs_of_topic(self, topic: int, num_docs: int = None) -> List['ReprDocOfTopic']:
+    def get_k_most_repr_docs_of_topic(self, topic: int, num_docs: int = None) -> List['ReprDocOfTopicDTO']:
         """
-        Given a topic-id and a number of documents, this function returns a List[ReprDocOfTopic] with info
-        about the num_docs most representative documents of the given topic. Of each document, ReprDocOfTopic stores:
+        Given a topic-id and a number of documents, this function returns a List[ReprDocOfTopicDTO] with info
+        about the num_docs most representative documents of the given topic. Of each document, ReprDocOfTopicDTO stores:
 
         * The document original content
         * A summary of the document original content
@@ -209,7 +209,7 @@ class ModelsWrapper:
 
         :param topic: Topic id in the range [0,num_topics-1]
         :param num_docs: Number of documents to be returned.
-        :return: List[ReprDocOfTopic] with the num_docs most representative documents of the given topic.
+        :return: List[ReprDocOfTopicDTO] with the num_docs most representative documents of the given topic.
         """
 
         # Check if the topic id has a valid value
@@ -232,13 +232,13 @@ class ModelsWrapper:
                 raise UserError('num_docs param must be in the range [{0},{1}]'
                                 .format(param_min_value, param_max_value))
 
-        # Obtain the num_docs most representative document of the given topic as a pandas DataFrame
+        # Obtain the num_docs most representative documents of the given topic as a pandas DataFrame
         k_most_repr_docs_of_topic_df = self.topics_model.get_k_most_repr_docs_of_topic_as_df(topic, k=num_docs)
 
         # Obtain the num_summary_sentences param specific for the most representative documents
         num_summary_sentences = get_param('topics.documents.num_summary_sentences.default')
 
-        # Get the info from the DataFrame, generate the summaries and store each doc info inside a ReprDocOfTopic object
+        # Get the info from the DataFrame, generate the summaries and store each doc info inside a ReprDocOfTopicDTO object
         repr_doc_of_topic_list = []
         progress_bar = tqdm(range(num_docs))
         for i in progress_bar:
@@ -254,26 +254,26 @@ class ModelsWrapper:
             # Obtain the document-topic probability
             doc_topic_prob = k_most_repr_docs_of_topic_df['Topic prob'][i]
 
-            repr_doc_of_topic_list.append(ReprDocOfTopic(doc_content, doc_content_summary, doc_topic_prob))
+            repr_doc_of_topic_list.append(ReprDocOfTopicDTO(doc_content, doc_content_summary, doc_topic_prob))
 
         return repr_doc_of_topic_list
 
-    def get_text_related_topics(self, text: str, max_num_topics: int = None) -> List['TextTopicProb']:
+    def get_text_related_topics(self, text: str, max_num_topics: int = None) -> List['TextTopicProbDTO']:
         """
-        Given a text and a max number of topics, this function returns a List[TextTopicProb] with info
+        Given a text and a max number of topics, this function returns a List[TextTopicProbDTO] with info
         about the probability of the topics being related with the given text.
 
-        The number of TextTopicProb objects returned is the min(max_num_topics, topics_model.num_topics).
+        The number of TextTopicProbDTO objects returned is the min(max_num_topics, topics_model.num_topics).
 
-        Of each document, TextTopicProb stores:
+        Of each document, TextTopicProbDTO stores:
 
         * The topic id
         * The text-topic probability
 
         :param text: The text from which you want to calculate the probability of the topics.
         :param max_num_topics: Max number of topics to be returned.
-        The number of TextTopicProb objects returned is the min(max_num_topics, topics_model.num_topics).
-        :return: List[TextTopicProb] with info about the probability of the topics being related with the given text.
+        The number of TextTopicProbDTO objects returned is the min(max_num_topics, topics_model.num_topics).
+        :return: List[TextTopicProbDTO] with info about the probability of the topics being related with the given text.
         """
         if max_num_topics is not None:
             # If max_num_topics has value, check if it's inside the valid range
@@ -285,21 +285,77 @@ class ModelsWrapper:
         topic_prob_list = self.topics_model.predict_topic_prob_on_text(text, num_best_topics=max_num_topics,
                                                                        print_table=False)
 
-        # Store the info of each topic in the topic_prob_list inside a TextTopicProb object
+        # Store the info of each topic in the topic_prob_list inside a TextTopicProbDTO object
         text_topic_prob_list = []
         for topic_prob in topic_prob_list:
-            text_topic_prob_list.append(TextTopicProb(topic=topic_prob[0], text_topic_prob=topic_prob[1]))
+            text_topic_prob_list.append(TextTopicProbDTO(topic=topic_prob[0], text_topic_prob=topic_prob[1]))
 
         return text_topic_prob_list
 
-    def get_text_related_docs(self):
-        raise NotImplementedError
+    def get_text_related_docs(self, text: str, num_docs: int = None) -> List['TextRelatedDocDTO']:
+        """
+        Given a text and a number of documents, this function returns a List[TextRelatedDocDTO] with info
+        about the documents of the dataset more related with the given text.
+        Of each document, TextRelatedDocDTO stores:
+
+        * The document original content
+        * A summary of the document original content
+        * The document-text probability
+        * The dominant topic of the document
+
+        :param text: The text from which you want to obtain the related documents.
+        :param num_docs: Number of documents to be returned.
+        :return: List[TextRelatedDocDTO] with info about the documents of the dataset more related with the given text.
+        """
+
+        # Obtain the params values from the params file
+        param_name = 'text.num_related_documents'
+
+        if num_docs is None:
+            # If num_docs has no value, give it the default one
+            num_docs = get_param(param_name + '.default')
+        else:
+            # If num_docs has value, check if it's inside the valid range
+            param_min_value = get_param(param_name + '.min')
+            param_max_value = get_param(param_name + '.max')
+
+            if num_docs < param_min_value or num_docs > param_max_value:
+                raise UserError('num_docs param must be in the range [{0},{1}]'
+                                .format(param_min_value, param_max_value))
+
+        # Obtain the num_docs most related documents to the given text as a pandas DataFrame
+        related_docs_df = self.topics_model.get_related_docs_as_df(text, num_docs=num_docs)
+
+        # Obtain the num_summary_sentences param specific for the related documents
+        num_summary_sentences = get_param('topics.documents.num_summary_sentences.default')
+
+        # Get the info from the DataFrame, generate the summaries and store each doc info inside a TextRelatedDocDTO object
+        text_related_doc_list = []
+        progress_bar = tqdm(range(num_docs))
+        for i in progress_bar:
+            progress_bar.set_description('Selecting document content and generating summaries')
+            # Obtain the document content
+            doc_content = related_docs_df['Original doc text'][i]
+            # Generate the document content summary
+            doc_content_summary, _ = self._summarize_text(doc_content, num_summary_sentences)
+            # In this function, the second value returned by _summarize_text() is not used,
+            # because here the summary of a document is something secondary/accessory, and it doesn't really
+            # matter if the summary was generated with the SummarizationModel or not.
+
+            # Obtain the document-text probability
+            doc_text_prob = related_docs_df['Doc prob'][i]
+            # Obtain the dominant topic of the document
+            doc_topic = related_docs_df['Topic index'][i]
+
+            text_related_doc_list.append(TextRelatedDocDTO(doc_content, doc_content_summary, doc_text_prob, doc_topic))
+
+        return text_related_doc_list
 
     def get_text_summary(self):
         raise NotImplementedError
 
 
-class ReprDocOfTopic:
+class ReprDocOfTopicDTO:
     """
     DTO that stores the information about one of the most representative documents of a topic.
 
@@ -314,7 +370,7 @@ class ReprDocOfTopic:
         self.doc_topic_prob = doc_topic_prob
 
 
-class TextTopicProb:
+class TextTopicProbDTO:
     """
     DTO that stores the information about the probability of a topic being related with a given text.
 
@@ -326,3 +382,19 @@ class TextTopicProb:
     def __init__(self, topic: int, text_topic_prob: float):
         self.topic = topic
         self.text_topic_prob = text_topic_prob
+
+
+class TextRelatedDocDTO:
+    """
+    DTO that stores the information about one of the related documents of a given text.
+
+    Instances of this class are created inside the get_text_related_docs() method.
+
+    The apis/user module will use this class to access the info returned by get_text_related_docs().
+    """
+
+    def __init__(self, doc_content: str, doc_content_summary: str, doc_text_prob: float, doc_topic: int):
+        self.doc_content = doc_content
+        self.doc_content_summary = doc_content_summary
+        self.doc_text_prob = doc_text_prob
+        self.doc_topic = doc_topic
