@@ -219,7 +219,6 @@ class ModelsWrapper:
 
         # Obtain the params values from the params file
         param_name = 'topics.documents.num_documents'
-
         if num_docs is None:
             # If num_docs has no value, give it the default one
             num_docs = get_param(param_name + '.default')
@@ -238,7 +237,7 @@ class ModelsWrapper:
         # Obtain the num_summary_sentences param specific for the most representative documents
         num_summary_sentences = get_param('topics.documents.num_summary_sentences.default')
 
-        # Get the info from the DataFrame, generate the summaries and store each doc info inside a ReprDocOfTopicDTO object
+        # Get the info from the df, generate the summaries and store each doc info inside a ReprDocOfTopicDTO object
         repr_doc_of_topic_list = []
         progress_bar = tqdm(range(num_docs))
         for i in progress_bar:
@@ -310,7 +309,6 @@ class ModelsWrapper:
 
         # Obtain the params values from the params file
         param_name = 'text.num_related_documents'
-
         if num_docs is None:
             # If num_docs has no value, give it the default one
             num_docs = get_param(param_name + '.default')
@@ -329,7 +327,7 @@ class ModelsWrapper:
         # Obtain the num_summary_sentences param specific for the related documents
         num_summary_sentences = get_param('topics.documents.num_summary_sentences.default')
 
-        # Get the info from the DataFrame, generate the summaries and store each doc info inside a TextRelatedDocDTO object
+        # Get the info from the df, generate the summaries and store each doc info inside a TextRelatedDocDTO object
         text_related_doc_list = []
         progress_bar = tqdm(range(num_docs))
         for i in progress_bar:
@@ -351,8 +349,35 @@ class ModelsWrapper:
 
         return text_related_doc_list
 
-    def get_text_summary(self):
-        raise NotImplementedError
+    def get_text_summary(self, text: str, num_summary_sentences: int = None) -> 'TextSummaryDTO':
+        """
+        Given a text and a number of sentences, this function returns a TextSummaryDTO with info
+        about the summary of the given text. The TextSummaryDTO stores:
+
+        * The text summary
+        * A bool that specifies if the summary was generated using the SummarizationModel (it converges)
+          or was generated selecting the first num_summary_sentences sentences of the text (the model doesn't converge).
+
+        :param text: Text to be summarized.
+        :param num_summary_sentences: Number of sentences of the text to be returned.
+        :return: TextSummaryDTO with info about the summary of the given text.
+        """
+
+        # Obtain the params values from the params file
+        param_name = 'text.num_summary_sentences'
+        if num_summary_sentences is None:
+            # If num_summary_sentences has no value, give it the default one
+            num_summary_sentences = get_param(param_name + '.default')
+        else:
+            # If num_summary_sentences has value, check if it's greater or equal than the min value
+            param_min_value = get_param(param_name + '.min')
+            if num_summary_sentences < param_min_value:
+                raise UserError('num_summary_sentences param must be >= {}'.format(param_min_value))
+
+        # Generate the text summary
+        text_summary, summary_generated_with_the_model = self._summarize_text(text, num_summary_sentences)
+
+        return TextSummaryDTO(text_summary, summary_generated_with_the_model)
 
 
 class ReprDocOfTopicDTO:
@@ -398,3 +423,17 @@ class TextRelatedDocDTO:
         self.doc_content_summary = doc_content_summary
         self.doc_text_prob = doc_text_prob
         self.doc_topic = doc_topic
+
+
+class TextSummaryDTO:
+    """
+    DTO that stores the information about a text summary generated in the get_text_summary() method.
+
+    Instances of this class are created inside the get_text_summary() method.
+
+    The apis/user module will use this class to access the info returned by get_text_summary().
+    """
+
+    def __init__(self, text_summary: str, summary_generated_with_the_model: bool):
+        self.text_summary = text_summary
+        self.summary_generated_with_the_model = summary_generated_with_the_model
