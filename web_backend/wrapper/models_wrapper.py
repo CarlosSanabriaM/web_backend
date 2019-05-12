@@ -208,8 +208,8 @@ class ModelsWrapper:
         * The document-topic probability
 
         :param topic: Topic id in the range [0,num_topics-1]
-        :param num_docs:
-        :return:
+        :param num_docs: Number of documents to be returned.
+        :return: List[ReprDocOfTopic] with the num_docs most representative documents of the given topic.
         """
 
         # Check if the topic id has a valid value
@@ -258,8 +258,39 @@ class ModelsWrapper:
 
         return repr_doc_of_topic_list
 
-    def get_text_related_topics(self):
-        raise NotImplementedError
+    def get_text_related_topics(self, text: str, max_num_topics: int = None) -> List['TextTopicProb']:
+        """
+        Given a text and a max number of topics, this function returns a List[TextTopicProb] with info
+        about the probability of the topics being related with the given text.
+
+        The number of TextTopicProb objects returned is the min(max_num_topics, topics_model.num_topics).
+
+        Of each document, TextTopicProb stores:
+
+        * The topic id
+        * The text-topic probability
+
+        :param text: The text from which you want to calculate the probability of the topics.
+        :param max_num_topics: Max number of topics to be returned.
+        The number of TextTopicProb objects returned is the min(max_num_topics, topics_model.num_topics).
+        :return: List[TextTopicProb] with info about the probability of the topics being related with the given text.
+        """
+        if max_num_topics is not None:
+            # If max_num_topics has value, check if it's inside the valid range
+            if max_num_topics < 1 or max_num_topics > self.topics_model.num_topics:
+                raise UserError('max_num_topics param must be in the range [{0},{1}]'
+                                .format(1, self.topics_model.num_topics))
+
+        # Obtain the probability of each topic being related to the given text
+        topic_prob_list = self.topics_model.predict_topic_prob_on_text(text, num_best_topics=max_num_topics,
+                                                                       print_table=False)
+
+        # Store the info of each topic in the topic_prob_list inside a TextTopicProb object
+        text_topic_prob_list = []
+        for topic_prob in topic_prob_list:
+            text_topic_prob_list.append(TextTopicProb(topic=topic_prob[0], text_topic_prob=topic_prob[1]))
+
+        return text_topic_prob_list
 
     def get_text_related_docs(self):
         raise NotImplementedError
@@ -281,3 +312,17 @@ class ReprDocOfTopic:
         self.doc_content = doc_content
         self.doc_content_summary = doc_content_summary
         self.doc_topic_prob = doc_topic_prob
+
+
+class TextTopicProb:
+    """
+    DTO that stores the information about the probability of a topic being related with a given text.
+
+    Instances of this class are created inside the get_text_related_topics() method.
+
+    The apis/user module will use this class to access the info returned by get_text_related_topics().
+    """
+
+    def __init__(self, topic: int, text_topic_prob: float):
+        self.topic = topic
+        self.text_topic_prob = text_topic_prob
