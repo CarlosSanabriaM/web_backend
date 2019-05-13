@@ -1,5 +1,5 @@
 import os
-from typing import List, Dict, Tuple
+from typing import List, Tuple
 
 from networkx import PowerIterationFailedConvergence
 from nltk import sent_tokenize
@@ -112,7 +112,7 @@ class ModelsWrapper:
 
         return self.topics_model.get_topics(num_keywords)
 
-    def get_topics_word_cloud_images_urls(self, num_keywords: int = None) -> Dict[str, str]:
+    def get_topics_word_cloud_images_urls(self, num_keywords: int = None) -> List['TopicImageUrlDTO']:
         """
         Returns a dict with the following structure:
 
@@ -159,16 +159,16 @@ class ModelsWrapper:
                                        show_plot=False, save=True, dir_save_path=wordcloud_images_num_keywords_dir,
                                        save_base_name='topic', dpi=200)
 
-        # TODO: Change to return a list of dicts
-        # Return a dictionary {'topicx': 'path/to/topicx-image.png'}, with paths relative to the static folder
-        num_keywords_dir_relative_path = wordcloud_images_num_keywords_dir.split('static/')[1]
-        topic_wordcloud_image_relative_path = join_paths(num_keywords_dir_relative_path, 'topic{}.png')
-        paths_dict = {
-            'topic{}'.format(topic): topic_wordcloud_image_relative_path.format(topic)
-            for topic in range(self.topics_model.num_topics)
-        }
+        # Generate the url of each topic and store it inside a TopicImageUrlDTO object
+        topic_image_url_list = []
+        for topic in range(self.topics_model.num_topics):
+            # Generate urls starting in '/static/...'
+            num_keywords_dir_relative_path = '/static/' + wordcloud_images_num_keywords_dir.split('static/')[1]
+            image_url = join_paths(num_keywords_dir_relative_path, 'topic{}.png'.format(topic))
 
-        return paths_dict
+            topic_image_url_list.append(TopicImageUrlDTO(topic, image_url))
+
+        return topic_image_url_list
 
     def _summarize_text(self, text: str, num_summary_sentences: int) -> Tuple[str, bool]:
         """
@@ -382,6 +382,20 @@ class ModelsWrapper:
         text_summary, summary_generated_with_the_model = self._summarize_text(text, num_summary_sentences)
 
         return TextSummaryDTO(text_summary, summary_generated_with_the_model)
+
+
+class TopicImageUrlDTO:
+    """
+    DTO that stores the information about the wordcloud image url of each topic.
+
+    Instances of this class are created inside the get_topics_word_cloud_images_urls() method.
+
+    The apis/user module will use this class to access the info returned by get_topics_word_cloud_images_urls().
+    """
+
+    def __init__(self, topic: int, image_url: str):
+        self.topic = topic
+        self.image_url = image_url
 
 
 class ReprDocOfTopicDTO:

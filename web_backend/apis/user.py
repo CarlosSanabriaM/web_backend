@@ -36,7 +36,29 @@ def get_topics_text():
 
 @user_api.route('/topics/wordcloud')
 def get_topics_word_cloud_images_urls():
-    raise NotImplementedError
+    """
+    REST API endpoint that, for each topic, returns a url that points to a wordcloud image of that topic.
+
+    The endpoint can only be called with a HTTP GET method.
+
+    Admits a param in the URL called num_keywords: int (endpoint?num_keywords=10, for example).
+
+    If the num_keywords param is not valid, an error (in JSON format) with HTTP 422 status code is returned.
+    """
+
+    # Get the num_keywords param from the request URL
+    # If the param is not present or it's type is not int, None is returned
+    num_keywords = request.args.get('num_keywords', type=int)
+
+    try:
+        # Call the ModelsWrapper get_topics_word_cloud_images_urls(), passing it the num_keywords
+        topic_image_url_dto_list = models_wrapper.get_topics_word_cloud_images_urls(num_keywords)
+        # Transform the List[ReprDocOfTopicDTO] to a list of dicts
+        dicts_list = _transform_dto_list_to_list_of_dicts(topic_image_url_dto_list)
+        return jsonify(dicts_list)  # 200 OK
+    except UserInvalidParamError as err:
+        # If num_keywords doesn't have a valid value, send a 422 error message to the user
+        abort(422, description=err.message)
 
 
 @user_api.route('/topics/<int:topic_id>/documents')
