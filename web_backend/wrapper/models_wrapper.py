@@ -292,7 +292,7 @@ class ModelsWrapper:
 
         return text_topic_prob_list
 
-    def get_text_related_docs(self, text: str, num_docs: int = None) -> List['TextRelatedDocDTO']:
+    def get_text_related_docs(self, text: str, num_documents: int = None) -> List['TextRelatedDocDTO']:
         """
         Given a text and a number of documents, this function returns a List[TextRelatedDocDTO] with info
         about the documents of the dataset more related with the given text.
@@ -304,33 +304,33 @@ class ModelsWrapper:
         * The dominant topic of the document
 
         :param text: The text from which you want to obtain the related documents.
-        :param num_docs: Number of documents to be returned.
+        :param num_documents: Number of documents to be returned.
         :return: List[TextRelatedDocDTO] with info about the documents of the dataset more related with the given text.
         """
 
         # Obtain the params values from the params file
         param_name = 'text.num_related_documents'
-        if num_docs is None:
-            # If num_docs has no value, give it the default one
-            num_docs = get_param(param_name + '.default')
+        if num_documents is None:
+            # If num_documents has no value, give it the default one
+            num_documents = get_param(param_name + '.default')
         else:
-            # If num_docs has value, check if it's inside the valid range
+            # If num_documents has value, check if it's inside the valid range
             param_min_value = get_param(param_name + '.min')
             param_max_value = get_param(param_name + '.max')
 
-            if num_docs < param_min_value or num_docs > param_max_value:
-                raise UserError('num_docs param must be in the range [{0},{1}]'
+            if num_documents < param_min_value or num_documents > param_max_value:
+                raise UserError('num_documents param must be in the range [{0},{1}]'
                                 .format(param_min_value, param_max_value))
 
-        # Obtain the num_docs most related documents to the given text as a pandas DataFrame
-        related_docs_df = self.topics_model.get_related_docs_as_df(text, num_docs=num_docs)
+        # Obtain the num_documents most related documents to the given text as a pandas DataFrame
+        related_docs_df = self.topics_model.get_related_docs_as_df(text, num_docs=num_documents)
 
         # Obtain the num_summary_sentences param specific for the related documents
         num_summary_sentences = get_param('topics.documents.num_summary_sentences.default')
 
         # Get the info from the df, generate the summaries and store each doc info inside a TextRelatedDocDTO object
         text_related_doc_list = []
-        progress_bar = tqdm(range(num_docs))
+        progress_bar = tqdm(range(num_documents))
         for i in progress_bar:
             progress_bar.set_description('Selecting document content and generating summaries')
             # Obtain the document content
@@ -344,7 +344,7 @@ class ModelsWrapper:
             # Obtain the document-text probability
             doc_text_prob = related_docs_df['Doc prob'][i]
             # Obtain the dominant topic of the document
-            doc_topic = related_docs_df['Topic index'][i]
+            doc_topic = int(related_docs_df['Topic index'][i])  # Convert numpy.int64 to int
 
             text_related_doc_list.append(TextRelatedDocDTO(doc_content, doc_content_summary, doc_text_prob, doc_topic))
 

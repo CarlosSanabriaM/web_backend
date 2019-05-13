@@ -49,13 +49,42 @@ def get_text_related_topics():
 
 @user_api.route('/text/related/documents', methods=['POST'])
 def get_text_related_docs():
-    raise NotImplementedError
+    """
+    REST API endpoint that returns the documents of the dataset more related to the given text.
+
+    The endpoint can only be called with a HTTP POST method. The params that admits are:
+
+    * A text: str param in the request body
+    * A num_documents: int param in the URL
+
+    If the num_documents param is not valid, an error (in JSON format) with HTTP 422 status code is returned.
+    """
+
+    # Get the text param from the request body
+    # If the param is not present Flask sends an automatic response with 400 Bad Request status code
+    text: str = request.form['text']
+
+    # Get the num_documents param from the request URL
+    # If the param is not present or it's type is not int, None is returned
+    num_documents = request.args.get('num_documents', type=int)
+
+    try:
+        # Call the ModelsWrapper get_text_related_docs(), passing it the text and the num_documents
+        text_related_doc_dto_list = models_wrapper.get_text_related_docs(text, num_documents)
+        # Transform the List[TextRelatedDocDTO] to a JSON list of JSON objects
+        json_list = [vars(text_related_doc_dto) for text_related_doc_dto in text_related_doc_dto_list]
+        return jsonify(json_list)  # 200 OK
+    except UserError as err:
+        # If num_documents doesn't have a valid value, send a 422 error message to the user
+        abort(422, description=err.message)
 
 
 @user_api.route('/text/summary', methods=['POST'])
 def get_text_summary():
     """
-    REST API endpoint that only can be called with a HTTP POST method. The params that admits are:
+    REST API endpoint that summarizes a given text.
+
+    The endpoint can only be called with a HTTP POST method. The params that admits are:
 
     * A text: str param in the request body
     * A num_summary_sentences: int param in the URL
@@ -71,8 +100,8 @@ def get_text_summary():
     # If the param is not present or it's type is not int, None is returned
     num_summary_sentences = request.args.get('num_summary_sentences', type=int)
 
-    # Call the ModelsWrapper get_text_summary(), passing it the text and the num_summary_sentences
     try:
+        # Call the ModelsWrapper get_text_summary(), passing it the text and the num_summary_sentences
         return jsonify(vars(models_wrapper.get_text_summary(text, num_summary_sentences)))  # 200 OK
     except UserError as err:
         # If num_summary_sentences doesn't have a valid value, send a 422 error message to the user
