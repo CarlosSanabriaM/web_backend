@@ -25,3 +25,4 @@ text:
         max: 20  # MAX_NUM_DOCUMENTOS_SIMILARES
     num_summary_sentences:  # NUM_FRASES_RESUMEN_USUARIO
         default: 4
+        min: 1

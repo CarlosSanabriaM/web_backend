@@ -158,6 +158,7 @@ class ModelsWrapper:
                                        show_plot=False, save=True, dir_save_path=wordcloud_images_num_keywords_dir,
                                        save_base_name='topic', dpi=200)
 
+        # TODO: Change to return a list of dicts
         # Return a dictionary {'topicx': 'path/to/topicx-image.png'}, with paths relative to the static folder
         num_keywords_dir_relative_path = wordcloud_images_num_keywords_dir.split('static/')[1]
         topic_wordcloud_image_relative_path = join_paths(num_keywords_dir_relative_path, 'topic{}.png')
@@ -198,7 +199,7 @@ class ModelsWrapper:
 
         return text_summary, summary_generated_with_the_model
 
-    def get_k_most_repr_docs_of_topic(self, topic: int, num_docs: int = None) -> List['ReprDocOfTopicDTO']:
+    def get_k_most_repr_docs_of_topic(self, topic_id: int, num_documents: int = None) -> List['ReprDocOfTopicDTO']:
         """
         Given a topic-id and a number of documents, this function returns a List[ReprDocOfTopicDTO] with info
         about the num_docs most representative documents of the given topic. Of each document, ReprDocOfTopicDTO stores:
@@ -207,39 +208,39 @@ class ModelsWrapper:
         * A summary of the document original content
         * The document-topic probability
 
-        :param topic: Topic id in the range [0,num_topics-1]
-        :param num_docs: Number of documents to be returned.
+        :param topic_id: Topic id in the range [0,num_topics-1]
+        :param num_documents: Number of documents to be returned.
         :return: List[ReprDocOfTopicDTO] with the num_docs most representative documents of the given topic.
         """
 
-        # Check if the topic id has a valid value
-        if topic < 0 or topic > self.topics_model.num_topics - 1:
-            raise UserError('topic param must be in the range [{0},{1}]'
+        # Check if the topic_id id has a valid value
+        if topic_id < 0 or topic_id > self.topics_model.num_topics - 1:
+            raise UserError('topic_id param must be in the range [{0},{1}]'
                             .format(0, self.topics_model.num_topics - 1))
 
         # Obtain the params values from the params file
         param_name = 'topics.documents.num_documents'
-        if num_docs is None:
-            # If num_docs has no value, give it the default one
-            num_docs = get_param(param_name + '.default')
+        if num_documents is None:
+            # If num_documents has no value, give it the default one
+            num_documents = get_param(param_name + '.default')
         else:
-            # If num_docs has value, check if it's inside the valid range
+            # If num_documents has value, check if it's inside the valid range
             param_min_value = get_param(param_name + '.min')
             param_max_value = get_param(param_name + '.max')
 
-            if num_docs < param_min_value or num_docs > param_max_value:
-                raise UserError('num_docs param must be in the range [{0},{1}]'
+            if num_documents < param_min_value or num_documents > param_max_value:
+                raise UserError('num_documents param must be in the range [{0},{1}]'
                                 .format(param_min_value, param_max_value))
 
-        # Obtain the num_docs most representative documents of the given topic as a pandas DataFrame
-        k_most_repr_docs_of_topic_df = self.topics_model.get_k_most_repr_docs_of_topic_as_df(topic, k=num_docs)
+        # Obtain the num_documents most representative documents of the given topic as a pandas DataFrame
+        k_most_repr_docs_of_topic_df = self.topics_model.get_k_most_repr_docs_of_topic_as_df(topic_id, k=num_documents)
 
         # Obtain the num_summary_sentences param specific for the most representative documents
         num_summary_sentences = get_param('topics.documents.num_summary_sentences.default')
 
         # Get the info from the df, generate the summaries and store each doc info inside a ReprDocOfTopicDTO object
         repr_doc_of_topic_list = []
-        progress_bar = tqdm(range(num_docs))
+        progress_bar = tqdm(range(num_documents))
         for i in progress_bar:
             progress_bar.set_description('Selecting document content and generating summaries')
             # Obtain the document content
