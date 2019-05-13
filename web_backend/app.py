@@ -11,7 +11,7 @@ app.register_blueprint(admin_api)
 
 @app.route('/')
 def app_running_message():
-    res = jsonify(web_backend_running='yes')
+    res = jsonify(web_backend_running=True)
     res.status_code = 200
     return res
 

@@ -13,11 +13,21 @@ models_wrapper = TwentyNewsGroupsDatasetModelsWrapper()
 
 @user_api.route('/')
 def user_api_message():
-    return jsonify(user_api_running='yes')  # 200 OK
+    return jsonify(user_api_running=True)  # 200 OK
 
 
 @user_api.route('/topics/text')
 def get_topics_text():
+    """
+    REST API endpoint that returns the most important keywords of each topic, and their probabilities.
+
+    The endpoint can only be called with a HTTP GET method.
+
+    Admits a param in the URL called num_keywords: int (endpoint?num_keywords=10, for example).
+
+    If the num_keywords param is not valid, an error (in JSON format) with HTTP 422 status code is returned.
+    """
+
     # Get the num_keywords param from the request URL
     # If the param is not present or it's type is not int, None is returned
     num_keywords = request.args.get('num_keywords', type=int)
