@@ -1,3 +1,5 @@
+from typing import Any, Dict, List
+
 from flask import Blueprint, jsonify, request
 from werkzeug.exceptions import abort
 
@@ -44,7 +46,34 @@ def get_k_most_repr_docs_of_topic(topic_id: int):
 
 @user_api.route('/text/related/topics', methods=['POST'])
 def get_text_related_topics():
-    raise NotImplementedError
+    """
+    REST API endpoint that returns info about the probability of the topics being related with the given text.
+
+    The endpoint can only be called with a HTTP POST method. The params that admits are:
+
+    * A text: str param in the request body
+    * A max_num_topics: int param in the URL
+
+    If the max_num_topics param is not valid, an error (in JSON format) with HTTP 422 status code is returned.
+    """
+
+    # Get the text param from the request body
+    # If the param is not present Flask sends an automatic response with 400 Bad Request status code
+    text: str = request.form['text']
+
+    # Get the max_num_topics param from the request URL
+    # If the param is not present or it's type is not int, None is returned
+    max_num_topics = request.args.get('max_num_topics', type=int)
+
+    try:
+        # Call the ModelsWrapper get_text_related_topics(), passing it the text and the max_num_topics
+        text_topic_prob_dto_list = models_wrapper.get_text_related_topics(text, max_num_topics)
+        # Transform the List[TextTopicProbDTO] to a list of dicts
+        dicts_list = _transform_dto_list_to_list_of_dicts(text_topic_prob_dto_list)
+        return jsonify(dicts_list)  # 200 OK
+    except UserError as err:
+        # If max_num_topics doesn't have a valid value, send a 422 error message to the user
+        abort(422, description=err.message)
 
 
 @user_api.route('/text/related/documents', methods=['POST'])
@@ -71,9 +100,9 @@ def get_text_related_docs():
     try:
         # Call the ModelsWrapper get_text_related_docs(), passing it the text and the num_documents
         text_related_doc_dto_list = models_wrapper.get_text_related_docs(text, num_documents)
-        # Transform the List[TextRelatedDocDTO] to a JSON list of JSON objects
-        json_list = [vars(text_related_doc_dto) for text_related_doc_dto in text_related_doc_dto_list]
-        return jsonify(json_list)  # 200 OK
+        # Transform the List[TextRelatedDocDTO] to a list of dicts
+        dicts_list = _transform_dto_list_to_list_of_dicts(text_related_doc_dto_list)
+        return jsonify(dicts_list)  # 200 OK
     except UserError as err:
         # If num_documents doesn't have a valid value, send a 422 error message to the user
         abort(422, description=err.message)
@@ -106,3 +135,10 @@ def get_text_summary():
     except UserError as err:
         # If num_summary_sentences doesn't have a valid value, send a 422 error message to the user
         abort(422, description=err.message)
+
+
+def _transform_dto_list_to_list_of_dicts(dto_list) -> List[Dict[str, Any]]:
+    """
+    Given a list of DTO objects, this function returns a list of dicts, that can be passed to jsonify function.
+    """
+    return [vars(dto_obj) for dto_obj in dto_list]
