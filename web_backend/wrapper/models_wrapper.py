@@ -1,17 +1,17 @@
 import os
-from typing import List, Tuple
+from typing import List, Tuple, Any, Dict
 
 from networkx import PowerIterationFailedConvergence
 from nltk import sent_tokenize
 from topics_and_summary.models.summarization import TextRank
-from topics_and_summary.models.topics import TopicsModel, LdaMalletModel, Topic
+from topics_and_summary.models.topics import TopicsModel, LdaMalletModel
 from topics_and_summary.utils import pretty_print
 from topics_and_summary.visualizations import plot_word_clouds_of_topics
 from tqdm import tqdm
 
 from web_backend.params import get_param
 from web_backend.utils import get_abspath_from_project_source_root, join_paths, UserInvalidParamError, \
-    UserResourceWithParamValueNotFoundError
+    UserResourceWithParamValueNotFoundError, rename_attribute
 
 
 class ModelsWrapper:
@@ -83,16 +83,16 @@ class ModelsWrapper:
                             'Given value: {0}\n'
                             'Possible values: "glove" or "word2vec"'.format(summarization_model_word_embeddings))
 
-    def get_topics_text(self, num_keywords: int = None) -> List[Topic]:
+    def get_topics_text(self, num_keywords: int = None) -> List[Dict[str, Any]]:
         """
-        Returns the topics of the TopicsModel in text format.
+        Given a number of keywords, this function returns the topics of the TopicsModel in text format.
 
         If num_keywords has no value, the default value is obtained from the params file.
 
         If num_keywords value is lesser than the min value for this param or is greater than the max value
         for this param (both specified in the params file) a UserError exception is raised.
 
-        :return: A list of Topic's objects with the topics of the TopicsModel.
+        :return: A list of dicts that can be directly used by the jsonify() function.
         """
 
         # Obtain the params values from the params file
@@ -110,14 +110,28 @@ class ModelsWrapper:
                 raise UserInvalidParamError('num_keywords param must be in the range [{0},{1}]'
                                             .format(param_min_value, param_max_value))
 
-        return self.topics_model.get_topics(num_keywords)
+        # Obtain the topics as a List[Topic]
+        topics_list = self.topics_model.get_topics(num_keywords)
+
+        # Convert the List[Topic] in the following list:
+        # [{"topic": 0, "keywords": [{"name": "god", "probability": 0.87}, ...]}, ...]
+        for topic in topics_list:
+            # Rename the topic.id attribute to topic.topic
+            rename_attribute(topic, 'id', 'topic')
+            # Transform each Keyword object into a dict
+            topic.keywords = [vars(keyword) for keyword in topic.keywords]
+        # Transform each Topic object into a dict
+        topics_list = [vars(topic) for topic in topics_list]
+
+        return topics_list
 
     def get_topics_word_cloud_images_urls(self, num_keywords: int = None) -> List['TopicImageUrlDTO']:
         """
-        Returns a dict with the following structure:
+        Given a number of keywords, this function returns a List[TopicImageUrlDTO] with, for each topic,
+        a url that points to a wordcloud image of that topic. Each TopicImageUrlDTO stores:
 
-        * key (str): 'topic<topic-id>'
-        * value (str): 'path/to/topic<topic-id>-image.png', with paths relative to the static folder
+        * The topic id
+        * The url to a wordcloud image of the topic, with the num_keywords specified
 
         If wordcloud images with the same num_keywords have been previously generated, they are not generated again.
         If not, they are generated and stored inside a new folder <num_keywords>keywords. This new folder is created
@@ -128,7 +142,7 @@ class ModelsWrapper:
         If num_keywords value is lesser than the min value for this param or is greater than the max value
         for this param (both specified in the params file) a UserError exception is raised.
 
-        :return: A dict with relative paths to the images as explained above.
+        :return: List[TopicImageUrlDTO] with, for each topic, a url that points to a wordcloud image of that topic.
         """
 
         # Obtain the params values from the params file
@@ -268,7 +282,7 @@ class ModelsWrapper:
 
         The number of TextTopicProbDTO objects returned is the min(max_num_topics, topics_model.num_topics).
 
-        Of each document, TextTopicProbDTO stores:
+        Of each topic, TextTopicProbDTO stores:
 
         * The topic id
         * The text-topic probability

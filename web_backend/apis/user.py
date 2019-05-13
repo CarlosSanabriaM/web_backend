@@ -24,11 +24,7 @@ def get_topics_text():
 
     try:
         # Try to obtain the topics in text format.
-        topics_list = models_wrapper.get_topics_text(num_keywords)
-        # Convert the List[Topic] in the following JSON:
-        # [{"topic": 0, "keywords": [{"keyword": "god", "probability": 0.87}, ...]}, ...]
-        raise NotImplementedError
-
+        return jsonify(models_wrapper.get_topics_text(num_keywords))  # 200 OK
     except UserInvalidParamError as err:
         # If num_keywords doesn't have a valid value, send a 422 error message to the user
         abort(422, description=err.message)

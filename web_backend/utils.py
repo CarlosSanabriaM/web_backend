@@ -23,6 +23,14 @@ def get_abspath_from_project_source_root(_path: str) -> str:
     return path.abspath(join_paths(PROJECT_SOURCE_ROOT_PATH, _path))
 
 
+def rename_attribute(obj, old_attribute_name, new_attribute_name):
+    """
+    Given a object, this function renames one of it's attributes.
+    """
+    setattr(obj, new_attribute_name, getattr(obj, old_attribute_name))
+    delattr(obj, old_attribute_name)
+
+
 class UserError(Exception):
     """
     Exception for raising user errors.
