@@ -3,7 +3,7 @@ from typing import Any, Dict, List
 from flask import Blueprint, jsonify, request
 from werkzeug.exceptions import abort
 
-from web_backend.utils import UserError
+from web_backend.utils import UserInvalidParamError, UserResourceWithParamValueNotFoundError
 from web_backend.wrapper.twenty_news_groups_dataset_models_wrapper import TwentyNewsGroupsDatasetModelsWrapper
 
 user_api = Blueprint('user_api', __name__, url_prefix='/user/api', static_url_path='/static')
@@ -29,7 +29,7 @@ def get_topics_text():
         # [{"topic": 0, "keywords": [{"keyword": "god", "probability": 0.87}, ...]}, ...]
         raise NotImplementedError
 
-    except UserError as err:
+    except UserInvalidParamError as err:
         # If num_keywords doesn't have a valid value, send a 422 error message to the user
         abort(422, description=err.message)
 
@@ -41,7 +41,35 @@ def get_topics_word_cloud_images_urls():
 
 @user_api.route('/topics/<int:topic_id>/documents')
 def get_k_most_repr_docs_of_topic(topic_id: int):
-    raise NotImplementedError
+    """
+    REST API endpoint that returns info about the most representative documents of the given topic.
+
+    The endpoint can only be called with a HTTP GET method. The URL embedded param topic_id is obligatory.
+
+    The other param that admits is num_documents: int param in the URL (endpoint?num_documents=10, for example).
+
+    If the topic_id param is not present in the topics_model, an error (in JSON format)
+    with HTTP 404 status code is returned.
+
+    If the num_documents param is not valid, an error (in JSON format) with HTTP 422 status code is returned.
+    """
+
+    # Get the num_documents param from the request URL
+    # If the param is not present or it's type is not int, None is returned
+    num_documents = request.args.get('num_documents', type=int)
+
+    try:
+        # Call the ModelsWrapper get_k_most_repr_docs_of_topic(), passing it the topic_id and the num_documents
+        repr_doc_of_topic_dto_list = models_wrapper.get_k_most_repr_docs_of_topic(topic_id, num_documents)
+        # Transform the List[ReprDocOfTopicDTO] to a list of dicts
+        dicts_list = _transform_dto_list_to_list_of_dicts(repr_doc_of_topic_dto_list)
+        return jsonify(dicts_list)  # 200 OK
+    except UserInvalidParamError as err:
+        # If num_documents doesn't have a valid value, send a 422 error message to the user
+        abort(422, description=err.message)
+    except UserResourceWithParamValueNotFoundError as err:
+        # If a topic with the topic_id specified by the user doesn't exist, send a 404 error message to the user
+        abort(404, description=err.message)
 
 
 @user_api.route('/text/related/topics', methods=['POST'])
@@ -52,7 +80,7 @@ def get_text_related_topics():
     The endpoint can only be called with a HTTP POST method. The params that admits are:
 
     * A text: str param in the request body
-    * A max_num_topics: int param in the URL
+    * A max_num_topics: int param in the URL (endpoint?max_num_topics=10, for example)
 
     If the max_num_topics param is not valid, an error (in JSON format) with HTTP 422 status code is returned.
     """
@@ -71,7 +99,7 @@ def get_text_related_topics():
         # Transform the List[TextTopicProbDTO] to a list of dicts
         dicts_list = _transform_dto_list_to_list_of_dicts(text_topic_prob_dto_list)
         return jsonify(dicts_list)  # 200 OK
-    except UserError as err:
+    except UserInvalidParamError as err:
         # If max_num_topics doesn't have a valid value, send a 422 error message to the user
         abort(422, description=err.message)
 
@@ -84,7 +112,7 @@ def get_text_related_docs():
     The endpoint can only be called with a HTTP POST method. The params that admits are:
 
     * A text: str param in the request body
-    * A num_documents: int param in the URL
+    * A num_documents: int param in the URL (endpoint?num_documents=10, for example)
 
     If the num_documents param is not valid, an error (in JSON format) with HTTP 422 status code is returned.
     """
@@ -103,7 +131,7 @@ def get_text_related_docs():
         # Transform the List[TextRelatedDocDTO] to a list of dicts
         dicts_list = _transform_dto_list_to_list_of_dicts(text_related_doc_dto_list)
         return jsonify(dicts_list)  # 200 OK
-    except UserError as err:
+    except UserInvalidParamError as err:
         # If num_documents doesn't have a valid value, send a 422 error message to the user
         abort(422, description=err.message)
 
@@ -116,7 +144,7 @@ def get_text_summary():
     The endpoint can only be called with a HTTP POST method. The params that admits are:
 
     * A text: str param in the request body
-    * A num_summary_sentences: int param in the URL
+    * A num_summary_sentences: int param in the URL (endpoint?num_summary_sentences=10, for example)
 
     If the num_summary_sentences param is not valid, an error (in JSON format) with HTTP 422 status code is returned.
     """
@@ -132,7 +160,7 @@ def get_text_summary():
     try:
         # Call the ModelsWrapper get_text_summary(), passing it the text and the num_summary_sentences
         return jsonify(vars(models_wrapper.get_text_summary(text, num_summary_sentences)))  # 200 OK
-    except UserError as err:
+    except UserInvalidParamError as err:
         # If num_summary_sentences doesn't have a valid value, send a 422 error message to the user
         abort(422, description=err.message)
 

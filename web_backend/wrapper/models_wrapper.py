@@ -10,7 +10,8 @@ from topics_and_summary.visualizations import plot_word_clouds_of_topics
 from tqdm import tqdm
 
 from web_backend.params import get_param
-from web_backend.utils import get_abspath_from_project_source_root, UserError, join_paths
+from web_backend.utils import get_abspath_from_project_source_root, join_paths, UserInvalidParamError, \
+    UserResourceWithParamValueNotFoundError
 
 
 class ModelsWrapper:
@@ -106,8 +107,8 @@ class ModelsWrapper:
             param_max_value = get_param(param_name + '.max')
 
             if num_keywords < param_min_value or num_keywords > param_max_value:
-                raise UserError('num_keywords param must be in the range [{0},{1}]'
-                                .format(param_min_value, param_max_value))
+                raise UserInvalidParamError('num_keywords param must be in the range [{0},{1}]'
+                                            .format(param_min_value, param_max_value))
 
         return self.topics_model.get_topics(num_keywords)
 
@@ -142,8 +143,8 @@ class ModelsWrapper:
             param_max_value = get_param(param_name + '.max')
 
             if num_keywords < param_min_value or num_keywords > param_max_value:
-                raise UserError('num_keywords param must be in the range [{0},{1}]'
-                                .format(param_min_value, param_max_value))
+                raise UserInvalidParamError('num_keywords param must be in the range [{0},{1}]'
+                                            .format(param_min_value, param_max_value))
 
         wordcloud_images_num_keywords_dir = join_paths(self.WORDCLOUD_IMAGES_DIR_PATH,
                                                        '{}keywords'.format(num_keywords))
@@ -215,8 +216,10 @@ class ModelsWrapper:
 
         # Check if the topic_id id has a valid value
         if topic_id < 0 or topic_id > self.topics_model.num_topics - 1:
-            raise UserError('topic_id param must be in the range [{0},{1}]'
-                            .format(0, self.topics_model.num_topics - 1))
+            raise UserResourceWithParamValueNotFoundError(
+                'topic with topic_id {0} not found. '
+                'topic_id param must be in the range [{1},{2}]'.format(topic_id, 0, self.topics_model.num_topics - 1)
+            )
 
         # Obtain the params values from the params file
         param_name = 'topics.documents.num_documents'
@@ -229,8 +232,8 @@ class ModelsWrapper:
             param_max_value = get_param(param_name + '.max')
 
             if num_documents < param_min_value or num_documents > param_max_value:
-                raise UserError('num_documents param must be in the range [{0},{1}]'
-                                .format(param_min_value, param_max_value))
+                raise UserInvalidParamError('num_documents param must be in the range [{0},{1}]'
+                                            .format(param_min_value, param_max_value))
 
         # Obtain the num_documents most representative documents of the given topic as a pandas DataFrame
         k_most_repr_docs_of_topic_df = self.topics_model.get_k_most_repr_docs_of_topic_as_df(topic_id, k=num_documents)
@@ -278,8 +281,8 @@ class ModelsWrapper:
         if max_num_topics is not None:
             # If max_num_topics has value, check if it's inside the valid range
             if max_num_topics < 1 or max_num_topics > self.topics_model.num_topics:
-                raise UserError('max_num_topics param must be in the range [{0},{1}]'
-                                .format(1, self.topics_model.num_topics))
+                raise UserInvalidParamError('max_num_topics param must be in the range [{0},{1}]'
+                                            .format(1, self.topics_model.num_topics))
 
         # Obtain the probability of each topic being related to the given text
         topic_prob_list = self.topics_model.predict_topic_prob_on_text(text, num_best_topics=max_num_topics,
@@ -319,8 +322,8 @@ class ModelsWrapper:
             param_max_value = get_param(param_name + '.max')
 
             if num_documents < param_min_value or num_documents > param_max_value:
-                raise UserError('num_documents param must be in the range [{0},{1}]'
-                                .format(param_min_value, param_max_value))
+                raise UserInvalidParamError('num_documents param must be in the range [{0},{1}]'
+                                            .format(param_min_value, param_max_value))
 
         # Obtain the num_documents most related documents to the given text as a pandas DataFrame
         related_docs_df = self.topics_model.get_related_docs_as_df(text, num_docs=num_documents)
@@ -373,7 +376,7 @@ class ModelsWrapper:
             # If num_summary_sentences has value, check if it's greater or equal than the min value
             param_min_value = get_param(param_name + '.min')
             if num_summary_sentences < param_min_value:
-                raise UserError('num_summary_sentences param must be >= {}'.format(param_min_value))
+                raise UserInvalidParamError('num_summary_sentences param must be >= {}'.format(param_min_value))
 
         # Generate the text summary
         text_summary, summary_generated_with_the_model = self._summarize_text(text, num_summary_sentences)

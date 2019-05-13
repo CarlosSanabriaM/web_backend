@@ -24,8 +24,30 @@ def get_abspath_from_project_source_root(_path: str) -> str:
 
 
 class UserError(Exception):
+    """
+    Exception for raising user errors.
+
+    The exception contains a message attribute.
+    """
+
     def __init__(self, message):
         """
         :param message: Message of the Error.
         """
         self.message = message
+
+
+class UserInvalidParamError(UserError):
+    """
+    Exception for raising user errors, when param value introduced by the user is invalid.
+
+    The exception contains a message attribute.
+    """
+
+
+class UserResourceWithParamValueNotFoundError(UserError):
+    """
+    Exception for raising user errors, when param value introduced by the user doesn't found any resource.
+
+    The exception contains a message attribute.
+    """
