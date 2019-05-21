@@ -21,9 +21,11 @@ def get_param(name: str, yaml_file_path: str = None) -> int:
     """
     Returns the value of the param with the specified name from a yaml file.
 
-    Example
-    -------
-    get_param('topics.text.num_keywords.default') loads the value 5 from the following params file:
+    Example:
+
+    >>> get_param('topics.text.num_keywords.default')
+
+    loads the value 5 from the following params file:
 
     topics:
         text:
@@ -56,6 +58,13 @@ def get_param(name: str, yaml_file_path: str = None) -> int:
 
 
 def update_param(name: str, value: int, yaml_file_path: str = None):
+    """
+    Given a param name, updates it's value.
+
+    :param name: Name of the parameter, using '.' to separate keys.
+    :param value: New value of the param (int).
+    :param yaml_file_path: Path to the params file.
+    """
     if yaml_file_path is None:
         yaml_file_path = _PARAMS_FILE_PATH
 

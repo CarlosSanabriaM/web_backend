@@ -5,6 +5,9 @@ PROJECT_SOURCE_ROOT_PATH = path.dirname(path.abspath(__file__))
 
 
 def join_paths(path1: str, *paths: str) -> str:
+    """
+    Joins 2 paths. If paths contains '/', transform to '\\' if os is Windows.
+    """
     # If paths contains '/', transform to '\\' if os is Windows.
     path1 = path.normcase(path1)
     paths = map(lambda p: path.normcase(p), paths)

@@ -288,7 +288,7 @@ class ModelsWrapper:
         * The text-topic probability
 
         :param text: The text from which you want to calculate the probability of the topics.
-        :param max_num_topics: Max number of topics to be returned.
+        :param max_num_topics: Max number of topics to be returned. \
         The number of TextTopicProbDTO objects returned is the min(max_num_topics, topics_model.num_topics).
         :return: List[TextTopicProbDTO] with info about the probability of the topics being related with the given text.
         """

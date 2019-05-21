@@ -13,6 +13,9 @@ models_wrapper = TwentyNewsGroupsDatasetModelsWrapper()
 
 @user_api.route('/')
 def user_api_message():
+    """
+    If the User API is running, returns a JSON response.
+    """
     return jsonify(user_api_running=True)  # 200 OK
 
 
