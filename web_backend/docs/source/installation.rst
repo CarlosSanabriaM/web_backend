@@ -117,6 +117,7 @@ To check if everything was installed correctly, execute the following commands:
     # It should print some files of the dataset
 
 
+.. _directory-structure:
 
 Directory structure
 -------------------
