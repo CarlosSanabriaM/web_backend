@@ -1,5 +1,5 @@
-API Reference
-=============
+Source Code API Reference
+=========================
 
 Indices and search
 ------------------
