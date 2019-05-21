@@ -1,0 +1,526 @@
+openapi: 3.0.1
+info:
+    title: Topics and summary User REST API
+    description: User REST API for the topics model generated using the topics_and_summary library in the 20Newsgroups dataset.
+    version: "1.0"
+    contact:
+        name: Carlos Sanabria Miranda
+        url: https://github.com/CarlosSanabriaM
+        email: uo250707@uniovi.es
+        # TODO: Choose a license
+        #license:
+        #name: Apache 2.0
+        #url: http://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+    # TODO: Change this url by the url in production
+    -   url: http://127.0.0.1:5000/user/api
+        description: The production API server
+
+
+# Defines the schema of the JSON with the error messages, that is referenced in many places
+components:
+    schemas:
+        Error:
+            type: object
+            properties:
+                # Field description
+                description:
+                    type: string
+                # Field status_code
+                status_code:
+                    type: integer
+                # Field status_name
+                status_name:
+                    type: string
+
+paths:
+    /:
+        get:
+            summary: User API running
+            description: Check if the User API is running.
+            responses:
+                '200':
+                    description: API is correctly running
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    user_api_running:
+                                        type: boolean
+                            examples:
+                                '0':
+                                    value:
+                                      {"user_api_running": true}
+            servers:
+                -   url: 'http://127.0.0.1:5000'
+        servers:
+            -   url: 'http://127.0.0.1:5000'
+
+
+    /topics/text:
+        get:
+            summary: Topics text format
+            description: Get topics in text format (most important keywords of each topic and the keywords probabilities).
+            parameters:
+                -   name: num_keywords
+                    description: Number of keywords to retrieve for each topic
+                    in: query
+                    schema:
+                        type: integer
+                    example: 2
+            responses:
+                '200':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                # Array of objects
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        # Field topic
+                                        topic:
+                                            type: integer
+                                        # Field keywords
+                                        keywords:
+                                            type: array
+                                            items:
+                                                type: object
+                                                properties:
+                                                    name:
+                                                        type: string
+                                                    probability:
+                                                        type: number
+                                                        format: float
+                            examples:
+                                '0':
+                                    value:
+                                      [
+                                      {
+                                          "topic": 0,
+                                          "keywords": [
+                                          {"name":"study", "probability":0.0081},
+                                          {"name":"drug","probability":0.0075}
+                                          ]
+                                      },
+                                      {
+                                          "topic":1,
+                                          "keywords": [
+                                          {"name":"people","probability":0.0233},
+                                          {"name":"point","probability":0.0160}
+                                          ]
+                                      }
+                                      ]
+                '422':
+                    description: num_keywords not valid
+                    content:
+                        application/json:
+                            schema:
+                                # Reference to the JSON error schema
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                '0':
+                                    value:
+                                      {
+                                          "description": "num_keywords param must be in the range [1,30]",
+                                          "status_code": 422,
+                                          "status_name": "Unprocessable Entity"
+                                      }
+
+
+    /topics/wordcloud:
+        get:
+            summary: Topics wordcloud images URLs
+            description: Get urls of the topics wordcloud images.
+            parameters:
+                -   name: num_keywords
+                    description: Number of keywords to retrieve for each topic
+                    in: query
+                    schema:
+                        type: integer
+                    example: 15
+            responses:
+                '200':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                # Array of objects
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        # Field topic
+                                        topic:
+                                            type: integer
+                                        # Field image_url
+                                        image_url:
+                                            type: string
+                            examples:
+                                '0':
+                                    value:
+                                      [
+                                      {"topic":0, "image_url":"/static/wordcloud-images/10keywords/topic0.png"},
+                                      {"topic":1, "image_url":"/static/wordcloud-images/10keywords/topic1.png"}
+                                      ]
+                '422':
+                    description: num_keywords not valid
+                    content:
+                        application/json:
+                            schema:
+                                # Reference to the JSON error schema
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                '0':
+                                    value:
+                                      {
+                                          "description": "num_keywords param must be in the range [1,100]",
+                                          "status_code": 422,
+                                          "status_name": "Unprocessable Entity"
+                                      }
+
+
+    /topics/{topic_id}/documents:
+        get:
+            summary: Topic documents
+            description: Get the most representative documents of the given topic.
+            parameters:
+                -   name: topic_id
+                    in: path
+                    required: true
+                    description: Id of the topic which documents want to be retrieved
+                    schema:
+                        type: integer
+                    example: 3
+                -   name: num_documents
+                    description: Number of documents to retrieve
+                    in: query
+                    schema:
+                        type: integer
+                    example: 2
+            responses:
+                '200':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                # Array of objects
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        # Field doc_content
+                                        doc_content:
+                                            type: string
+                                        # Field doc_content_summary
+                                        doc_content_summary:
+                                            type: string
+                                        # Field doc_topic_prob
+                                        doc_topic_prob:
+                                            type: number
+                                            format: float
+                            examples:
+                                '0':
+                                    value:
+                                      [
+                                      {
+                                          "doc_content": "<Document content>",
+                                          "doc_content_summary": "<Document summary>",
+                                          "doc_topic_prob": 0.8906
+                                      },
+                                      {
+                                          "doc_content": "<Document content>",
+                                          "doc_content_summary": "<Document summary>",
+                                          "doc_topic_prob": 0.8502
+                                      }
+                                      ]
+                '404':
+                    description: topic_id not valid
+                    content:
+                        application/json:
+                            schema:
+                                # Reference to the JSON error schema
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                '0':
+                                    value:
+                                      {
+                                          "description": "topic with topic_id 111 not found. topic_id param must be in the range [0,16]",
+                                          "status_code": 404,
+                                          "status_name": "Not Found"
+                                      }
+                '422':
+                    description: num_documents not valid
+                    content:
+                        application/json:
+                            schema:
+                                # Reference to the JSON error schema
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                '0':
+                                    value:
+                                      {
+                                          "description": "num_documents param must be in the range [1,30]",
+                                          "status_code": 422,
+                                          "status_name": "Unprocessable Entity"
+                                      }
+
+
+    /text/related/topics:
+        post:
+            summary: Text related topics
+            description: Get info about the probability of the topics being related with the given text.
+            parameters:
+                -   name: max_num_topics
+                    description: Max number of the best topics to be retrieved in the info.
+                    in: query
+                    schema:
+                        type: integer
+                    example: 4
+            requestBody:
+                required: true
+                content:
+                    application/x-www-form-urlencoded:
+                        schema:
+                            type: object
+                            properties:
+                                text:
+                                    type: string
+                                    description: The text from which you want to calculate the probability of the topics.
+                            required:
+                                - text
+            responses:
+                '200':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                # Array of objects
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        # Field topic
+                                        topic:
+                                            type: integer
+                                        # Field text_topic_prob
+                                        text_topic_prob:
+                                            type: number
+                                            format: float
+                            examples:
+                                '0':
+                                    value:
+                                      [
+                                      {
+                                          "topic": 2,
+                                          "text_topic_prob": 0.4732
+                                      },
+                                      {
+                                          "topic": 6,
+                                          "text_topic_prob": 0.3898
+                                      }
+                                      ]
+                '400':
+                    description: text data not present
+                    content:
+                        application/json:
+                            schema:
+                                # Reference to the JSON error schema
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                '0':
+                                    value:
+                                      {
+                                          "description": "The browser (or proxy) sent a request that this server could not understand.",
+                                          "status_code": 400,
+                                          "status_name": "Bad Request"
+                                      }
+                '422':
+                    description: max_num_topics not valid
+                    content:
+                        application/json:
+                            schema:
+                                # Reference to the JSON error schema
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                '0':
+                                    value:
+                                      {
+                                          "description": "max_num_topics param must be in the range [1,17]",
+                                          "status_code": 422,
+                                          "status_name": "Unprocessable Entity"
+                                      }
+
+
+    /text/related/documents:
+        post:
+            summary: Text related documents
+            description: Get info about the documents of the dataset more related with the given text.
+            parameters:
+                -   name: num_documents
+                    description: Number of documents to retrieve
+                    in: query
+                    schema:
+                        type: integer
+                    example: 2
+            requestBody:
+                required: true
+                content:
+                    application/x-www-form-urlencoded:
+                        schema:
+                            type: object
+                            properties:
+                                text:
+                                    type: string
+                                    description: The text from which you want to obtain the related documents.
+                            required:
+                                - text
+            responses:
+                '200':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                # Array of objects
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        # Field doc_content
+                                        doc_content:
+                                            type: string
+                                        # Field doc_content_summary
+                                        doc_content_summary:
+                                            type: string
+                                        # Field doc_text_prob
+                                        doc_text_prob:
+                                            type: number
+                                            format: float
+                                        # Field doc_topic
+                                        doc_topic:
+                                            type: integer
+                            examples:
+                                '0':
+                                    value:
+                                      [
+                                      {
+                                          "doc_content": "<Document content>",
+                                          "doc_content_summary": "<Document summary>",
+                                          "doc_text_prob": 0.4385,
+                                          "doc_topic": 2
+                                      },
+                                      {
+                                          "doc_content": "<Document content>",
+                                          "doc_content_summary": "<Document summary>",
+                                          "doc_text_prob": 0.3354,
+                                          "doc_topic": 9
+                                      }
+                                      ]
+                '400':
+                    description: text data not present
+                    content:
+                        application/json:
+                            schema:
+                                # Reference to the JSON error schema
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                '0':
+                                    value:
+                                      {
+                                          "description": "The browser (or proxy) sent a request that this server could not understand.",
+                                          "status_code": 400,
+                                          "status_name": "Bad Request"
+                                      }
+                '422':
+                    description: num_documents not valid
+                    content:
+                        application/json:
+                            schema:
+                                # Reference to the JSON error schema
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                '0':
+                                    value:
+                                      {
+                                          "description": "num_documents param must be in the range [1,20]",
+                                          "status_code": 422,
+                                          "status_name": "Unprocessable Entity"
+                                      }
+
+
+    /text/summary:
+        post:
+            summary: Text summary
+            description: Get summary of a given text.
+            parameters:
+                -   name: num_summary_sentences
+                    description: Number of sentences of the text to be retrieved.
+                    in: query
+                    schema:
+                        type: integer
+                    example: 2
+            requestBody:
+                required: true
+                content:
+                    application/x-www-form-urlencoded:
+                        schema:
+                            type: object
+                            properties:
+                                text:
+                                    type: string
+                                    description: The text from which you want to obtain the summary.
+                            required:
+                                - text
+            responses:
+                '200':
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    # Field summary_generated_with_the_model
+                                    summary_generated_with_the_model:
+                                        type: boolean
+                                    # Field text_summary
+                                    text_summary:
+                                        type: string
+                            examples:
+                                '0':
+                                    value:
+                                      {
+                                          "summary_generated_with_the_model": true,
+                                          "text_summary": "<Text summary sentence 1>. <Text summary sentence 2>."
+                                      }
+                '400':
+                    description: text data not present
+                    content:
+                        application/json:
+                            schema:
+                                # Reference to the JSON error schema
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                '0':
+                                    value:
+                                      {
+                                          "description": "The browser (or proxy) sent a request that this server could not understand.",
+                                          "status_code": 400,
+                                          "status_name": "Bad Request"
+                                      }
+                '422':
+                    description: num_summary_sentences not valid
+                    content:
+                        application/json:
+                            schema:
+                                # Reference to the JSON error schema
+                                $ref: '#/components/schemas/Error'
+                            examples:
+                                '0':
+                                    value:
+                                      {
+                                          "description": "num_summary_sentences param must be >= 1",
+                                          "status_code": 422,
+                                          "status_name": "Unprocessable Entity"
+                                      }
