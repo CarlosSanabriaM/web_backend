@@ -16,6 +16,9 @@ dist/
 build/
 *.egg-info/
 
+## Documentation ##
+web_backend/docs/build
+
 ## Some files of the topics model ##
 # This files are not needed
 web_backend/saved-elements/models/topics/lda_mallet_17topics_model/lda_mallet_17topics_modelstate.mallet.gz
