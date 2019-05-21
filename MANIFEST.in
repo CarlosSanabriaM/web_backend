@@ -1,0 +1,15 @@
+# Include all files in web_backend folder
+graft web_backend
+
+# Exclude the documentation files
+prune web_backend/docs
+
+# Exclude the tests
+prune web_backend/tests
+
+# Exclude Mac files
+global-exclude .DS_Store
+
+# Exclude python compiled files
+global-exclude __pycache__
+global-exclude *.py[co]
