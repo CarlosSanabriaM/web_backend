@@ -22,3 +22,4 @@ You should take a look to the User REST API documentation made with Swagger, usi
 
     api-reference
     installation
+    quickstart
