@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from web_backend.params import get_param
 from web_backend.utils import get_abspath_from_project_source_root, join_paths, UserInvalidParamError, \
-    UserResourceWithParamValueNotFoundError, rename_attribute
+    UserResourceWithParamValueNotFoundError, rename_attribute, get_param_value_from_conf_file
 
 
 class ModelsWrapper:
@@ -23,13 +23,10 @@ class ModelsWrapper:
     """
 
     TOPICS_MODELS_DIR_PATH = get_abspath_from_project_source_root('saved-elements/models/topics')
-    # TODO: Change this paths in production!
-    MALLET_SOURCE_CODE_PATH = get_abspath_from_project_source_root('../../topics_and_summary/mallet-2.0.8/bin/mallet')
-    WORD2VEC_EMBEDDINGS_PATH = get_abspath_from_project_source_root(
-        '../../topics_and_summary/embeddings/word2vec/GoogleNews-vectors-negative300.bin.gz')
-    GLOVE_EMBEDDINGS_DIR_PATH = get_abspath_from_project_source_root(
-        '../../topics_and_summary/embeddings/glove/glove.6B')
+    """ Path where the topics models are stored on disk. """
+
     WORDCLOUD_IMAGES_DIR_PATH = get_abspath_from_project_source_root('static/wordcloud-images')
+    """ Path where the wordcloud images are stored on disk. """
 
     def __init__(self, topics_model_name: str, dataset_path: str, model_class=LdaMalletModel,
                  summarization_model_word_embeddings='glove'):
@@ -57,12 +54,14 @@ class ModelsWrapper:
                             .format(model_class))
         elif model_class == LdaMalletModel:
             pretty_print('Loading the Topics Model')
+            # Load mallet_source_code_path from the conf.ini file
+            mallet_source_code_path = get_param_value_from_conf_file('MALLET', 'SOURCE_CODE_PATH')
             # LdaMalletModel has a different load method (has a mallet_path param)
             model_class: LdaMalletModel
             self.topics_model = model_class.load(topics_model_name,
                                                  model_parent_dir_path=self.TOPICS_MODELS_DIR_PATH,
                                                  dataset_path=dataset_path,
-                                                 mallet_path=self.MALLET_SOURCE_CODE_PATH)
+                                                 mallet_path=mallet_source_code_path)
         else:
             pretty_print('Loading the Topics Model')
             model_class: TopicsModel
@@ -73,11 +72,13 @@ class ModelsWrapper:
         # Create the summarization model
         pretty_print('Creating the TextRank model')
         if summarization_model_word_embeddings == 'glove':
-            self.summarization_model = TextRank(embedding_model='glove',
-                                                embeddings_path=self.GLOVE_EMBEDDINGS_DIR_PATH)
+            # Load glove_embeddings_path from the conf.ini file
+            glove_embeddings_path = get_param_value_from_conf_file('EMBEDDINGS', 'GLOVE_PATH')
+            self.summarization_model = TextRank(embedding_model='glove', embeddings_path=glove_embeddings_path)
         elif summarization_model_word_embeddings == 'word2vec':
-            self.summarization_model = TextRank(embedding_model='word2vec',
-                                                embeddings_path=self.WORD2VEC_EMBEDDINGS_PATH)
+            # Load word2vec_embeddings_path from the conf.ini file
+            word2vec_embeddings_path = get_param_value_from_conf_file('EMBEDDINGS', 'WORD2VEC_PATH')
+            self.summarization_model = TextRank(embedding_model='word2vec', embeddings_path=word2vec_embeddings_path)
         else:
             raise Exception('Wrong value for parameter summarization_model_word_embeddings.\n'
                             'Given value: {0}\n'

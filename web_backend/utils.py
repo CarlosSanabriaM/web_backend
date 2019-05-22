@@ -1,3 +1,4 @@
+import configparser
 from os import path
 
 # This python module (utils.py) must be in the root folder of the python package project.
@@ -32,6 +33,39 @@ def rename_attribute(obj, old_attribute_name, new_attribute_name):
     """
     setattr(obj, new_attribute_name, getattr(obj, old_attribute_name))
     delattr(obj, old_attribute_name)
+
+
+def get_param_value_from_conf_file(section: str, param: str) -> str:
+    """
+    Returns the value of the specified param from the conf.ini file.
+
+    The conf.ini file contains some configuration strings. \
+    Most of them are paths to some files/folders used by the backend, \
+    and that need to be modified manually to point to the location of those files/folders \
+    in the filesystem where the backend is executed.
+
+    :param section: Name of the section in the conf.ini file. For example: '[MALLET]'.
+    :param param: Name of the param inside that section. For example: 'SOURCE_CODE_PATH'.
+    :return: A str with the value specified in the conf.ini file for that param.
+
+    Example:
+
+    ; conf.ini
+
+    [MALLET]
+
+    SOURCE_CODE_PATH = /path/to/mallet
+
+    To access that value, execute:
+
+    >>> get_param_value_from_conf_file('MALLET', 'SOURCE_CODE_PATH')
+
+    """
+    paths_conf_file_path = get_abspath_from_project_source_root('conf.ini')
+    config = configparser.ConfigParser()
+    config.read(paths_conf_file_path)
+
+    return config[section][param]
 
 
 class UserError(Exception):
