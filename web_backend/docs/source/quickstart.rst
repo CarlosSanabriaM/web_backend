@@ -26,7 +26,8 @@ Deploying the web backend
 The instructions for configuring and deploying the flask app are present in the
 `'Deploy to Production' section of the Flask documentation <http://flask.pocoo.org/docs/1.0/tutorial/deploy/>`__.
 
-A quick summary for generating the wheel distribution and installing the backend:
+A quick summary for generating the wheel distribution and installing the backend and the topics_and_summary library
+in a isolated virtualenv:
 
 ::
 
@@ -35,7 +36,7 @@ A quick summary for generating the wheel distribution and installing the backend
     conda install wheel
     # pip install wheel # if using virtualenv instead of conda
 
-    # Create the binary distribution
+    # Create the binary distribution of the web_backend
     python setup.py bdist_wheel
 
     # Copy this file to another machine, set up a new virtualenv, then install the file with pip.
@@ -45,12 +46,15 @@ A quick summary for generating the wheel distribution and installing the backend
     source <env-name>/bin/activate
     # (<env-name>) should appear at the beginning of the prompt
     cd <env-name>
-    # Install the wheel file
+    # Install the wheel file with the backend
     pip install <path-to-.whl-file>
     # The lib/python3.6/site-packages/web_backend will be created along with other packages
 
     # Install the topics_and_summary library
-    pip install <path-to-topics-and-summary-project-root-folder>
+    # Create the binary distribution of the topics_and_summary library
+    python <path-to-topics-and-summary-project-root-folder>/setup.py bdist_wheel
+    # Install the wheel file with the topics_and_summary library
+    pip install <path-to-.whl-file-of-topics-and-summary-project>
 
     # Try the flask app
     export FLASK_APP=lib/python3.6/site-packages/web_backend/app.py
@@ -61,8 +65,8 @@ A quick summary for generating the wheel distribution and installing the backend
     deactivate
     # (<env-name>) should disappear form the beginning of the prompt
 
-.. warning:: This doesn't have into account that the files of the topics_and_summary library should be
-   located as explained in the :ref:`directory-structure` section.
+.. warning:: The paths to some directories/files must be specified in the conf.ini file.
+   This files are explained in the :ref:`required-directories-files` section.
 
 .. warning:: The development server (the one launched with flask run) is provided for convenience,
    but is not designed to be particularly efficient, stable, or secure. Instead, use a production WSGI server,

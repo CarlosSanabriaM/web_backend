@@ -117,25 +117,25 @@ To check if everything was installed correctly, execute the following commands:
     # It should print some files of the dataset
 
 
-.. _directory-structure:
+.. _required-directories-files:
 
-Directory structure
--------------------
+Required directories/files
+--------------------------
 
-This section explains where should be present the topics_and_summary files.
+This section explains the required directories/files for executing the topics_and_summary library functionality correctly.
 
-The web_backend project and the topics_and_summary project should be at the same level,
-so that the paths defined in web_backend that point to the topics_and_summary files still working.
-If not, this paths (e.g. GLOVE_EMBEDDINGS_DIR_PATH) need to be updated.
+.. note:: This info is explained in more detail in the *Download other elements* section of the *Usage Installation* page
+   of the topics_and_summary library documentation.
 
-.. code-block:: text
+* **datasets** folder: Here is where the datasets have to be stored, each dataset in it's own folder.
 
-    ├── topics_and_summary
-    │   ├── datasets
-    │   ├── demo-images
-    │   ├── embeddings
-    │   ├── mallet-2.0.8
-    │   └── topics_and_summary
-    └── web_backend
-        ├── tests
-        ├── web_backend
+   * 20_newsgroups: Contains the 20_newsgroups dataset.
+
+* **embeddings** folder: Here is where the pretrained word embeddings have to be stored. It must have the following folders:
+
+   * glove: Contains the glove.6B folder, obtained after decompressing the glove.6B.zip file.
+   * word2vec: Contains the GoogleNews-vectors-negative300.bin.gz file.
+
+* **mallet-2.0.8** folder: Is the mallet source code folder, obtained after decompressing the mallet-2.0.8.tar.gz file.
+
+.. warning:: Absolute paths to all this folders must be specified in the **conf.ini** configuration file.
