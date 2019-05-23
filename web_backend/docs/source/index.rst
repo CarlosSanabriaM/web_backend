@@ -21,5 +21,6 @@ You should take a look to the User REST API documentation made with Swagger, usi
     :caption: Documentation contents:
 
     api-reference
-    installation
-    quickstart
+    dependencies-and-files
+    execution-and-deployment
+    development

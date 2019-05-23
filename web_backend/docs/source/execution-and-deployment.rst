@@ -1,5 +1,5 @@
-Quickstart
-==========
+Execution and Deployment
+========================
 
 Launch the backend in development mode
 --------------------------------------
@@ -92,4 +92,5 @@ After executing the steps in the previous section, follow this steps:
     pip install waitress
 
     # Start the server with the web_backend Python module previously installed
-    waitress-serve --call 'web_backend:app.py'
+    # The server listens in the 8080 port
+    waitress-serve --port=8080 --host='0.0.0.0' web_backend.app:app

@@ -1,10 +1,7 @@
-.. _installation:
+.. _dependencies-and-required-files:
 
-Installation
-============
-
-To use the backend, apart of the source code, the following `dependencies`_ need to be installed:
-
+Dependencies and required files
+===============================
 
 .. _installation-dependencies:
 
@@ -104,7 +101,10 @@ Execute the following command inside the venv or conda environment:
 
 ::
 
-    pip install <path-to-topics-and-summary-project-root-folder>
+    # Create the binary distribution of the topics_and_summary library
+    python <path-to-topics-and-summary-project-root-folder>/setup.py bdist_wheel
+    # Install the wheel file with the topics_and_summary library
+    pip install <path-to-.whl-file-of-topics-and-summary-project>
 
 To check if everything was installed correctly, execute the following commands:
 
@@ -127,15 +127,9 @@ This section explains the required directories/files for executing the topics_an
 .. note:: This info is explained in more detail in the *Download other elements* section of the *Usage Installation* page
    of the topics_and_summary library documentation.
 
-* **datasets** folder: Here is where the datasets have to be stored, each dataset in it's own folder.
-
-   * 20_newsgroups: Contains the 20_newsgroups dataset.
-
-* **embeddings** folder: Here is where the pretrained word embeddings have to be stored. It must have the following folders:
-
-   * glove: Contains the glove.6B folder, obtained after decompressing the glove.6B.zip file.
-   * word2vec: Contains the GoogleNews-vectors-negative300.bin.gz file.
-
+* **20_newsgroups** folder: Contains the 20_newsgroups dataset.
+* **glove.6B** folder: Contains the Glove word embeddings.
+* **GoogleNews-vectors-negative300.bin.gz**: Contains the Word2Vec word embeddings.
 * **mallet-2.0.8** folder: Is the mallet source code folder, obtained after decompressing the mallet-2.0.8.tar.gz file.
 
 .. warning:: Absolute paths to all this folders must be specified in the **conf.ini** configuration file.

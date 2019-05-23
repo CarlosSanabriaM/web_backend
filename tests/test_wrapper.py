@@ -44,7 +44,7 @@ class TestModelsWrapper(unittest.TestCase):
         text that converges with the TextRank SummarizationModel.
 
         **Note:** The algorithm could return the first num_summary_sentences sentences if they are very important
-        in the text, but in this test we have choosen a text in which that doesn't happen.
+        in the text, but in this test we have chosen a text in which that doesn't happen.
         """
         # Load the text from a file
         with open(self._TEXT_CONVERGES_FILE_PATH) as f:
