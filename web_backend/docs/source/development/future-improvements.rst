@@ -8,6 +8,8 @@ Source code
   params-file.yaml file, which are used to limit the values that can introduce the users in the User REST API).
   The API must have authentication and must be implemented in the web_backend.apis.user.py module.
   This API allows the admin to get the value of the params and modify them.
+* Generate the summaries of the dataset documents in batch. This way, the API endpoints that return summaries of some
+  dataset documents will be faster (for now, summaries are generated in the moment).
 
 
 
