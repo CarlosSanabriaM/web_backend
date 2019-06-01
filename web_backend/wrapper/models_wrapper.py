@@ -54,7 +54,7 @@ class ModelsWrapper:
                             .format(model_class))
         elif model_class == LdaMalletModel:
             pretty_print('Loading the Topics Model')
-            # Load mallet_source_code_path from the conf.ini file
+            # Load mallet_source_code_path from the *-conf.ini file
             mallet_source_code_path = get_param_value_from_conf_file('MALLET', 'SOURCE_CODE_PATH')
             # LdaMalletModel has a different load method (has a mallet_path param)
             model_class: LdaMalletModel
@@ -72,11 +72,11 @@ class ModelsWrapper:
         # Create the summarization model
         pretty_print('Creating the TextRank model')
         if summarization_model_word_embeddings == 'glove':
-            # Load glove_embeddings_path from the conf.ini file
+            # Load glove_embeddings_path from the *-conf.ini file
             glove_embeddings_path = get_param_value_from_conf_file('EMBEDDINGS', 'GLOVE_PATH')
             self.summarization_model = TextRank(embedding_model='glove', embeddings_path=glove_embeddings_path)
         elif summarization_model_word_embeddings == 'word2vec':
-            # Load word2vec_embeddings_path from the conf.ini file
+            # Load word2vec_embeddings_path from the *-conf.ini file
             word2vec_embeddings_path = get_param_value_from_conf_file('EMBEDDINGS', 'WORD2VEC_PATH')
             self.summarization_model = TextRank(embedding_model='word2vec', embeddings_path=word2vec_embeddings_path)
         else:

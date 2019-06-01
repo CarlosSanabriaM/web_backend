@@ -15,6 +15,7 @@ Execute the following commands:
     export FLASK_APP=web_backend/app.py
     export FLASK_ENV=development
     export FLASK_DEBUG=0
+    export CONF_INI_FILE_PATH=<path/to/development-conf.ini>  # Path to the development configuration file
 
     # Launch the server
     flask run
@@ -55,9 +56,12 @@ in a isolated virtualenv:
     python <path-to-topics-and-summary-project-root-folder>/setup.py bdist_wheel
     # Install the wheel file with the topics_and_summary library
     pip install <path-to-.whl-file-of-topics-and-summary-project>
+    # Install nltk resources
+    python -c "import nltk;nltk.download('stopwords');nltk.download('wordnet');nltk.download('punkt')"
 
     # Try the flask app
-    export FLASK_APP=lib/python3.6/site-packages/web_backend/app.py
+    export CONF_INI_FILE_PATH=<path/to/production-conf.ini>  # Path to the production configuration file
+    export FLASK_APP=<env-path>/lib/python3.6/site-packages/web_backend/app.py
     flask run
     # Control + C to stop the development server
 
@@ -65,7 +69,7 @@ in a isolated virtualenv:
     deactivate
     # (<env-name>) should disappear form the beginning of the prompt
 
-.. warning:: The paths to some directories/files must be specified in the conf.ini file.
+.. warning:: The paths to some directories/files must be specified in the *-conf.ini file.
    This files are explained in the :ref:`required-directories-files` section.
 
 .. warning:: The development server (the one launched with flask run) is provided for convenience,
@@ -90,6 +94,9 @@ After executing the steps in the previous section, follow this steps:
 
     # Install waitress
     pip install waitress
+
+    # Export the configuration file variable
+    export CONF_INI_FILE_PATH=<path/to/production-conf.ini>  # Path to the production configuration file
 
     # Start the server with the web_backend Python module previously installed
     # The server listens in the 8080 port

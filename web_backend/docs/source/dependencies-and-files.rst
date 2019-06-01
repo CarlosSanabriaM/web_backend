@@ -105,6 +105,8 @@ Execute the following command inside the venv or conda environment:
     python <path-to-topics-and-summary-project-root-folder>/setup.py bdist_wheel
     # Install the wheel file with the topics_and_summary library
     pip install <path-to-.whl-file-of-topics-and-summary-project>
+    # Install nltk resources
+    python -c "import nltk;nltk.download('stopwords');nltk.download('wordnet');nltk.download('punkt')"
 
 To check if everything was installed correctly, execute the following commands:
 

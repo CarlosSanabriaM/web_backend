@@ -25,9 +25,9 @@ class TwentyNewsGroupsDatasetModelsWrapper(ModelsWrapper):
         Specifies default values that are passed to ModelsWrapper() to easily use the 20Newsgroups dataset.
 
         :param topics_model_name: Name of the topics_model stored in the TOPICS_MODELS_DIR_PATH folder. \
-        If is None, the value is loaded from the conf.ini file.
+        If is None, the value is loaded from the *-conf.ini file.
         :param dataset_path: Path to the folder that contains the original dataset documents. \
-        If is None, the value is loaded from the conf.ini file.
+        If is None, the value is loaded from the *-conf.ini file.
         :param model_class: TopicsModel class of the model with name topics_model_name \
         stored in the TOPICS_MODELS_DIR_PATH folder. It must be a subclass of TopicsModel. For example:
 
@@ -39,10 +39,10 @@ class TwentyNewsGroupsDatasetModelsWrapper(ModelsWrapper):
         """
 
         if topics_model_name is None:
-            # Load topics_model_name from the conf.ini file
+            # Load topics_model_name from the *-conf.ini file
             topics_model_name = get_param_value_from_conf_file('MODELS', 'BEST_TOPICS_MODEL_NAME')
         if dataset_path is None:
-            # Load twenty_newsgroups_dataset_path from the conf.ini file
+            # Load twenty_newsgroups_dataset_path from the *-conf.ini file
             dataset_path = get_param_value_from_conf_file('DATASETS', 'TWENTY_NEWS_GROUPS_DIR_PATH')
 
         super().__init__(topics_model_name, dataset_path, model_class, summarization_model_word_embeddings)

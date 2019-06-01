@@ -1,5 +1,6 @@
 import configparser
-from os import path
+import sys
+from os import path, environ
 
 # This python module (utils.py) must be in the root folder of the python package project.
 PROJECT_SOURCE_ROOT_PATH = path.dirname(path.abspath(__file__))
@@ -37,20 +38,28 @@ def rename_attribute(obj, old_attribute_name, new_attribute_name):
 
 def get_param_value_from_conf_file(section: str, param: str) -> str:
     """
-    Returns the value of the specified param from the conf.ini file.
+    Returns the value of the specified param from the *-conf.ini file.
 
-    The conf.ini file contains some configuration strings. \
+    * The *-conf.ini file contains configuration for the development environment
+    * The production-conf.ini file contains configuration for the production environment
+
+    The absolute path to the *-conf.ini file must be specified in the environment variable CONF_INI_FILE_PATH.
+
+    * In Unix and MacOS, this can be done with the following command: 'export CONF_INI_FILE_PATH=<path/to/*-conf.ini>'
+    * In Windows, this can be done with the following command: 'set CONF_INI_FILE_PATH=<path/to/*-conf.ini>'
+
+    The *-conf.ini file contains some configuration strings. \
     Most of them are paths to some files/folders used by the backend, \
     and that need to be modified manually to point to the location of those files/folders \
     in the filesystem where the backend is executed.
 
-    :param section: Name of the section in the conf.ini file. For example: '[MALLET]'.
+    :param section: Name of the section in the *-conf.ini file. For example: '[MALLET]'.
     :param param: Name of the param inside that section. For example: 'SOURCE_CODE_PATH'.
-    :return: A str with the value specified in the conf.ini file for that param.
+    :return: A str with the value specified in the *-conf.ini file for that param.
 
     Example:
 
-    ; conf.ini
+    ; development-conf.ini
 
     [MALLET]
 
@@ -61,7 +70,20 @@ def get_param_value_from_conf_file(section: str, param: str) -> str:
     >>> get_param_value_from_conf_file('MALLET', 'SOURCE_CODE_PATH')
 
     """
-    paths_conf_file_path = get_abspath_from_project_source_root('conf.ini')
+    # Obtain the path to the *-conf.ini file from the CONF_INI_FILE_PATH environment variable
+    try:
+        paths_conf_file_path = environ['CONF_INI_FILE_PATH']
+    except KeyError:
+        print(
+            "\nThe absolute path to the *-conf.ini file must be specified in the environment variable CONF_INI_FILE_PATH."
+            "\nIn development, the development-conf.ini file should be used."
+            "\nIn production, the production-conf.ini file should be used."
+            "\nTo specify the path in Unix and MacOS, use the command: 'export CONF_INI_FILE_PATH=<path/to/*-conf.ini>'"
+            "\nTo specify the path in Windows, use the command: 'set CONF_INI_FILE_PATH=<path/to/*-conf.ini>'"
+        )
+        # Finish the program
+        sys.exit(1)
+
     config = configparser.ConfigParser()
     config.read(paths_conf_file_path)
 
