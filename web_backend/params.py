@@ -5,7 +5,7 @@ from web_backend.utils import get_abspath_from_project_source_root
 _PARAMS_FILE_PATH = get_abspath_from_project_source_root('params-file.yaml')
 
 
-def _load_yaml_file(yaml_file_path):
+def _load_yaml_file(yaml_file_path: str):
     """
     Loads the specified yaml file into a python dict.
 

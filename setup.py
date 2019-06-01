@@ -1,6 +1,9 @@
+from os import path
+
 from setuptools import setup, find_packages
 
-with open("README.md", "r") as fh:
+this_directory_abs_path = path.abspath(path.dirname(__file__))
+with open(path.join(this_directory_abs_path, 'README.md'), "r") as fh:
     long_description = fh.read()
 
 setup(name='web_backend',
