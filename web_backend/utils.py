@@ -1,5 +1,4 @@
 import configparser
-import sys
 from os import path, environ
 
 # This python module (utils.py) must be in the root folder of the python package project.
@@ -74,15 +73,13 @@ def get_param_value_from_conf_file(section: str, param: str) -> str:
     try:
         conf_ini_file_path = environ['CONF_INI_FILE_PATH']
     except KeyError:
-        print(
+        raise EnvironmentError(
             "\nThe absolute path to the x-conf.ini file must be specified in the environment variable CONF_INI_FILE_PATH."
             "\nIn development, the development-conf.ini file should be used."
             "\nIn production, the production-conf.ini file should be used."
             "\nTo specify the path in Unix and MacOS, use the command: 'export CONF_INI_FILE_PATH=<path/to/x-conf.ini>'"
             "\nTo specify the path in Windows, use the command: 'set CONF_INI_FILE_PATH=<path/to/x-conf.ini>'"
         )
-        # Finish the program
-        sys.exit(1)
 
     config = configparser.ConfigParser()
     config.read(conf_ini_file_path)

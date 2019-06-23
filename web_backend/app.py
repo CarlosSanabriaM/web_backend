@@ -2,16 +2,13 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 
-from web_backend.apis.admin import admin_api
-from web_backend.apis.user import user_api
-
 
 def create_app():
     """
     Application Factory function. \
     See http://flask.pocoo.org/docs/1.0/tutorial/factory/ for more information.
 
-    :return: the Flask application.
+    :return: The Flask application.
     """
     # Create and configure the app
     # The app needs to know where it’s located to set up some paths,
@@ -22,7 +19,10 @@ def create_app():
     CORS(app)
 
     # Register blueprints of the user and admin apis
+    from web_backend.apis.user import user_api
     app.register_blueprint(user_api)
+
+    from web_backend.apis.admin import admin_api
     app.register_blueprint(admin_api)
 
     # Create a route to check if the application is running
