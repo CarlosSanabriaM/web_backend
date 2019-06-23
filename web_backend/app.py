@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 
 from web_backend.apis.admin import admin_api
@@ -6,6 +7,8 @@ from web_backend.apis.user import user_api
 
 # Create flask app
 app = Flask(__name__)
+# Allow CORS for all domains on all routes
+CORS(app)
 # Register blueprints of the user and admin apis
 app.register_blueprint(user_api)
 app.register_blueprint(admin_api)
