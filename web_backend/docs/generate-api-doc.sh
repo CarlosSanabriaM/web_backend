@@ -1,4 +1,11 @@
 #!/bin/sh
+
+# Raise an error if the CONF_INI_FILE_PATH environment variable is not set
+# See https://stackoverflow.com/a/307735/11440772 for more information about how this line works.
+: "${CONF_INI_FILE_PATH:?The absolute path to the development-conf.ini file must be specified in the environment variable CONF_INI_FILE_PATH.
+To specify the path in Unix and MacOS, use the command: 'export CONF_INI_FILE_PATH=<path/to/development-conf.ini>'
+To specify the path in Windows, use the command: 'set CONF_INI_FILE_PATH=<path/to/development-conf.ini>'}"
+
 cd source/
 
 # Generates the automatic documentation of the api of the project

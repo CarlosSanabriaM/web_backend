@@ -30,6 +30,27 @@ The sphinx library is required for modifying the documentation.
 How to modify the documentation
 -------------------------------
 
+CONF_INI_FILE_PATH environment variable
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**CONF_INI_FILE_PATH is an environment variable that must be set to be able to generate the documentation.**
+It's value must be the absolute path to the development-conf.ini file.
+
+The development-conf.ini file contains some configuration used in the development, for example, paths to the models.
+
+To set the variable in the Unix or MacOS terminal execute:
+
+   ::
+
+      export CONF_INI_FILE_PATH=<path/to/development-conf.ini>
+
+To set the variable in Windows CMD execute:
+
+   ::
+
+      set CONF_INI_FILE_PATH=<path/to/development-conf.ini>
+
+
 Directory structure and important files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

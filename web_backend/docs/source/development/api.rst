@@ -106,6 +106,30 @@ Directory structure and important files
 Important source code details
 -----------------------------
 
+CONF_INI_FILE_PATH environment variable
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**CONF_INI_FILE_PATH is an environment variable that must be set to be able to execute the application
+or generate the documentation.** In development, it's value must be the absolute path to the development-conf.ini file.
+
+The development-conf.ini file contains some configuration used in the development, for example, paths to the models.
+
+On **PyCharm**, this variable can be set in: Run --> Edit Configurations... --> + (Add new configuration) --> Flask Server -->
+Configuration tab --> Environment section --> Environment variables.
+
+To set the variable in the Unix or MacOS terminal execute:
+
+   ::
+
+      export CONF_INI_FILE_PATH=<path/to/development-conf.ini>
+
+To set the variable in Windows CMD execute:
+
+   ::
+
+      set CONF_INI_FILE_PATH=<path/to/development-conf.ini>
+
+
 Flask Blueprints
 ^^^^^^^^^^^^^^^^
 
