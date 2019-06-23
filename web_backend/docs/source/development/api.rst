@@ -74,7 +74,7 @@ Directory structure and important files
    * **static** folder: Contains the wordcloud images.
    * **wrapper** folder: Python package that wraps the functionality of the TopicsModels and SummarizationModels of the topics_and_summary library.
    * **app.py**: Python module that creates the Flask app.
-   * **utils.py**: Python module with some utilities: paths, rename attributes, access to the *-conf.ini params and User Defined Exceptions.
+   * **utils.py**: Python module with some utilities: paths, rename attributes, access to the x-conf.ini params and User Defined Exceptions.
    * **params.py**: Python module that encapsulates the access to the params-file.yaml file with the system parameters.
    * **params-file.yaml**: File that contains the system parameters.
    * **user-api-swagger.yaml**: File that contains the OpenAPI Specification (Swagger Specification) of the User REST API.

@@ -1,7 +1,7 @@
 .. _development-documentation:
 
 Development: Documentation
-===========================
+==========================
 
 This page explains how to **modify the documentation**.
 

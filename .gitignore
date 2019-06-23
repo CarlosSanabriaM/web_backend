@@ -13,11 +13,10 @@ __pycache__/
 
 ### Packaging ###
 dist/
-build/
 *.egg-info/
 
-## Documentation ##
-web_backend/docs/build
+## Packaging and documentation build ##
+build/
 
 ## Some files of the topics model ##
 # This files are not needed

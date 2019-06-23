@@ -1,8 +1,8 @@
 Execution and Deployment
 ========================
 
-Launch the backend in development mode
---------------------------------------
+Launch in development mode
+--------------------------
 
 This section explains how to launch the backend server with the REST API in development mode.
 
@@ -21,8 +21,8 @@ Execute the following commands:
     flask run
 
 
-Deploying the web backend
--------------------------
+Instructions for generic deployment
+-----------------------------------
 
 The instructions for configuring and deploying the flask app are present in the
 `'Deploy to Production' section of the Flask documentation <http://flask.pocoo.org/docs/1.0/tutorial/deploy/>`__.
@@ -69,7 +69,7 @@ in a isolated virtualenv:
     deactivate
     # (<env-name>) should disappear form the beginning of the prompt
 
-.. warning:: The paths to some directories/files must be specified in the *-conf.ini file.
+.. warning:: The paths to some directories/files must be specified in the x-conf.ini file.
    This files are explained in the :ref:`required-directories-files` section.
 
 .. warning:: The development server (the one launched with flask run) is provided for convenience,
@@ -101,3 +101,87 @@ After executing the steps in the previous section, follow this steps:
     # Start the server with the web_backend Python module previously installed
     # The server listens in the 8080 port
     waitress-serve --port=8080 --host='0.0.0.0' web_backend.app:app
+
+
+Generate and run a docker image
+-------------------------------
+
+The Dockerfile included in the web_backend root directory can be used to generate a docker image.
+
+.. warning:: The Dockerfile and the .dockerignore files are included in the web_backend root directory **only
+   for version control reasons**. **This 2 files must be moved to the parent directory of the web_backend root directory**.,
+   The topics_and_summary root directory also must be at the same level, i.e.:
+
+    .
+
+    ├── .dockerignore
+
+    ├── Dockerfile
+
+    ├── topics_and_summary
+
+    └── web_backend
+
+To generate the docker image, execute the following commands:
+
+::
+
+    # Move to the folder that contains the Dockerfile, and the web_backend and topics_and_summary folder
+    cd <web-backend-root-directory-parent-folder>
+    # Build the docker image (executes the Dockerfile)
+    docker build . -t web_backend:latest
+    # . is the build context. In this case, the current directory
+    # -t web_backend:latest specifies the name=web_backend and tag=latest for the image
+
+To create a docker container using the previously created image and run it, execute:
+
+::
+
+    # Create a container that executes the web backend at startup and lets it be accessible via the <host-port> port of the host
+    docker run --name web_backend -p <host-port>:8080 -e PORT=8080 -i -t web_backend:latest
+    # --name web_backend specifies the name of the container
+    # -p <host-port>:8080 specifies that the host port specified by the user will be mapped to the port 8080 of the container
+    # -e PORT=8080 sets the value of the $PORT environment variable used inside the Dockerfile.
+    # This value must be the same as the one specified in the second value of the -p argument, and must be > than 1024. Recommended is 8080
+    # -i and -t are used for interactive mode
+    # web_backend:latest specifies name:tag of the image that will be used to create the container
+
+    ### ALTERNATIVE WAY OF CREATING THE CONTAINER TO ENTER INSIDE IT ###
+    # Create a container and enter inside it, using a bash shell
+    docker run --name web_backend -p <host-port>:8080 -e PORT=8080 -i -t web_backend:latest /bin/bash
+    # The command is the same, except the last instruction: '/bin/bash'
+    # This overrides the default CMD command executed by the docker container at startup, executing a bash shell
+    # The default command is: waitress-serve --port=$PORT --host='0.0.0.0' web_backend.app:app
+    # This command starts the backend in the port specified by the environment variable PORT
+
+With this container running, the web backend will be accessible via the <host-port> port of the host machine.
+
+
+Deploy to Heroku
+----------------
+
+The web backend is deployed in Heroku in the following url: https://topics-and-summary-web-backend.herokuapp.com/.
+
+This was done creating an Heroku app called **topics-and-summary-web-backend**.
+
+The docker image created in the previous section is used to deploy the backend to Heroku. This is done using the
+`Heroku CLI <https://devcenter.heroku.com/articles/heroku-cli>`__. The commands are:
+
+::
+
+    # Log in to Heroku
+    heroku login
+    # Enter credentials
+
+    # Log in to Container Registry
+    heroku container:login
+    # 'Login Succeeded' message must appear
+
+    # Create a tag registry.heroku.com/topics-and-summary-web-backend/web that refers to web_backend image
+    docker tag web_backend registry.heroku.com/topics-and-summary-web-backend/web
+
+    # Push the image to the heroku docker registry
+    docker push registry.heroku.com/topics-and-summary-web-backend/web
+
+    # Release the web backend application
+    heroku container:release web --app topics-and-summary-web-backend
