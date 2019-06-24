@@ -7,9 +7,9 @@ info:
         name: Carlos Sanabria Miranda
         url: https://github.com/CarlosSanabriaM
         email: uo250707@uniovi.es
-        license:
-            name: MIT
-            url: https://opensource.org/licenses/MIT
+    license:
+        name: MIT
+        url: https://opensource.org/licenses/MIT
 servers:
     -   url: https://topics-and-summary-web-backend.herokuapp.com/user/api
         description: The production API server
