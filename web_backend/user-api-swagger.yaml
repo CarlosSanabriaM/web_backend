@@ -7,13 +7,11 @@ info:
         name: Carlos Sanabria Miranda
         url: https://github.com/CarlosSanabriaM
         email: uo250707@uniovi.es
-        # TODO: Choose a license
-        #license:
-        #name: Apache 2.0
-        #url: http://www.apache.org/licenses/LICENSE-2.0.html
+        license:
+            name: MIT
+            url: https://opensource.org/licenses/MIT
 servers:
-    # TODO: Change this url by the url in production
-    -   url: http://127.0.0.1:5000/user/api
+    -   url: https://topics-and-summary-web-backend.herokuapp.com/user/api
         description: The production API server
 
 
@@ -52,10 +50,6 @@ paths:
                                 '0':
                                     value:
                                       {"user_api_running": true}
-            servers:
-                -   url: 'http://127.0.0.1:5000'
-        servers:
-            -   url: 'http://127.0.0.1:5000'
 
 
     /topics/text:
