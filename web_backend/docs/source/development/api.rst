@@ -87,6 +87,8 @@ Directory structure and important files
 * **sonar-project.properties**: Contains the configuration for the SonarQube static code analysis tool.
 * **Dockerfile**: Contains the steps for creating the docker image to run the backend.
 * **.dockerignore**: Contains the files and folders ignored by the docker build context. Those files are not copied to the docker image.
+* **mallet-docker**: Shell script used to communicate with the Java mallet library, with some memory configurations for Docker.
+  This file will replace the mallet-2.0.8/bin/mallet file while creating the Docker image.
 * **.gitignore**: Contains the files and folders ignored by git.
 * **MANIFEST.in**: Define the list of files to include in the package installation.
 * **README.md**: Contains a quick explanation of the project.

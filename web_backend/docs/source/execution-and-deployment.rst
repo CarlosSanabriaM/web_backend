@@ -100,7 +100,7 @@ After executing the steps in the previous section, follow this steps:
 
     # Start the server with the web_backend Python module previously installed
     # The server listens in the 8080 port
-    waitress-serve --port=8080 --host='0.0.0.0' web_backend.app:app
+    waitress-serve --port=8080 --host='0.0.0.0' --call web_backend.app:create_app
 
 
 Generate and run a docker image
@@ -151,7 +151,7 @@ To create a docker container using the previously created image and run it, exec
     docker run --name web_backend -p <host-port>:8080 -e PORT=8080 -i -t web_backend:latest /bin/bash
     # The command is the same, except the last instruction: '/bin/bash'
     # This overrides the default CMD command executed by the docker container at startup, executing a bash shell
-    # The default command is: waitress-serve --port=$PORT --host='0.0.0.0' web_backend.app:app
+    # The default command is: waitress-serve --port=$PORT --host='0.0.0.0' --call web_backend.app:create_app
     # This command starts the backend in the port specified by the environment variable PORT
 
 With this container running, the web backend will be accessible via the <host-port> port of the host machine.
