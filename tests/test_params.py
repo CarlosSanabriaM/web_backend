@@ -2,12 +2,13 @@ import unittest
 from os import remove
 from shutil import copyfile
 
+from tests.utils import get_abspath_from_tests_root
 from web_backend.params import get_param, update_param
 
 
 class TestParams(unittest.TestCase):
-    _PARAMS_TEST_FILE_PATH = 'params-test-file.yaml'
-    _PARAMS_TEST_UPDATE_FILE_PATH = 'params-test-update-file.yaml'
+    _PARAMS_TEST_FILE_PATH = get_abspath_from_tests_root('params-test-file.yaml')
+    _PARAMS_TEST_UPDATE_FILE_PATH = get_abspath_from_tests_root('params-test-update-file.yaml')
 
     def test_get_param(self):
         """

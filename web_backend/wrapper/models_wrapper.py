@@ -293,11 +293,11 @@ class ModelsWrapper:
         The number of TextTopicProbDTO objects returned is the min(max_num_topics, topics_model.num_topics).
         :return: List[TextTopicProbDTO] with info about the probability of the topics being related with the given text.
         """
-        if max_num_topics is not None:
-            # If max_num_topics has value, check if it's inside the valid range
-            if max_num_topics < 1 or max_num_topics > self.topics_model.num_topics:
-                raise UserInvalidParamError('max_num_topics param must be in the range [{0},{1}]'
-                                            .format(1, self.topics_model.num_topics))
+
+        # If max_num_topics has value, check if it's inside the valid range
+        if max_num_topics is not None and (max_num_topics < 1 or max_num_topics > self.topics_model.num_topics):
+            raise UserInvalidParamError('max_num_topics param must be in the range [{0},{1}]'
+                                        .format(1, self.topics_model.num_topics))
 
         # Obtain the probability of each topic being related to the given text
         topic_prob_list = self.topics_model.predict_topic_prob_on_text(text, num_best_topics=max_num_topics,

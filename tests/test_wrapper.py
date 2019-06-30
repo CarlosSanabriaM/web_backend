@@ -2,12 +2,13 @@ import unittest
 
 from nltk import sent_tokenize
 
+from tests.utils import get_abspath_from_tests_root
 from web_backend.wrapper.twenty_news_groups_dataset_models_wrapper import TwentyNewsGroupsDatasetModelsWrapper
 
 
 class TestModelsWrapper(unittest.TestCase):
-    _TEXT_DOESNT_CONVERGE_FILE_PATH = 'text-doesnt-converge.txt'
-    _TEXT_CONVERGES_FILE_PATH = 'text-converges.txt'
+    _TEXT_DOESNT_CONVERGE_FILE_PATH = get_abspath_from_tests_root('text-doesnt-converge.txt')
+    _TEXT_CONVERGES_FILE_PATH = get_abspath_from_tests_root('text-converges.txt')
 
     @classmethod
     def setUpClass(cls) -> None:
