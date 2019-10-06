@@ -106,11 +106,10 @@ After executing the steps in the previous section, follow this steps:
 Generate and run a docker image
 -------------------------------
 
-The Dockerfile included in the web_backend root directory can be used to generate a docker image.
+The Dockerfile included in the parent directory of the web_backend directory can be used to generate a docker image.
 
-.. warning:: The Dockerfile and the .dockerignore files are included in the web_backend root directory **only
-   for version control reasons**. **This 2 files must be moved to the parent directory of the web_backend root directory**.,
-   The topics_and_summary root directory also must be at the same level, i.e.:
+.. note:: The Dockerfile and the .dockerignore files are included in the parent directory of the web_backend directory,
+   because they need to have access to the web_backend and topics_and_summary folders. The directory structure looks like this:
 
     .
 
@@ -126,7 +125,7 @@ To generate the docker image, execute the following commands:
 
 ::
 
-    # Move to the folder that contains the Dockerfile, and the web_backend and topics_and_summary folder
+    # Move to the folder that contains the Dockerfile and the web_backend and topics_and_summary folders
     cd <web-backend-root-directory-parent-folder>
     # Build the docker image (executes the Dockerfile)
     docker build . -t web_backend:latest
