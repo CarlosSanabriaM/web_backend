@@ -141,7 +141,9 @@ To create a docker container using the previously created image and run it, exec
     # --name web_backend specifies the name of the container
     # -p <host-port>:8080 specifies that the host port specified by the user will be mapped to the port 8080 of the container
     # -e PORT=8080 sets the value of the $PORT environment variable used inside the Dockerfile.
-    # This value must be the same as the one specified in the second value of the -p argument, and must be > than 1024. Recommended is 8080
+    # This value must be the same as the one specified in the second value of the -p argument, and must be > than 1024. Recommended is 8080.
+    # Set the value of <host-port> to 5000 if the backend is going to be executed along with the frontend in local (development mode),
+    # because the fronted is configured to communicate with the backend using the port 5000.
     # -i and -t are used for interactive mode
     # web_backend:latest specifies name:tag of the image that will be used to create the container
 
