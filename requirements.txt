@@ -5,4 +5,4 @@ Werkzeug==0.15.2
 Flask-Cors==3.0.7
 nltk==3.3
 typing==3.6.6
-PyYAML==5.1
+PyYAML==5.4
